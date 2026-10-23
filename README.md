@@ -14,3 +14,8 @@ Engineers learn from books, videos, practice sites, and projects, but progress i
 - Guide learning and practical mini-projects
 - Track evidence: Studied → Practiced → Applied → Demonstrated
 
+## Docs
+
+- [Problem statement](docs/problem-statement.md)
+- [v1 user journeys](docs/user-journeys.md)
+
