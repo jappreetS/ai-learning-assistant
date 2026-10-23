@@ -19,3 +19,9 @@ Engineers learn from books, videos, practice sites, and projects, but progress i
 - [Problem statement](docs/problem-statement.md)
 - [v1 user journeys](docs/user-journeys.md)
 - [v1 MVP feature list](docs/mvp-feature-list.md)
+
+## Run locally
+
+```bash
+npm install
+npm run dev
