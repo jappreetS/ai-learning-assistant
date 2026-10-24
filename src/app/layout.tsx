@@ -15,7 +15,10 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Learning Assistant",
+  title: {
+    default: "AI Learning Assistant",
+    template: "%s · AI Learning Assistant",
+  },
   description:
     "Describe a target role, see the skill gaps, and follow a plan you approve.",
 };
