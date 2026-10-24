@@ -1,26 +1,43 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: oklch(0.985 0.001 106.4);
+  --surface: oklch(1 0 0);
+  --ink: oklch(0.216 0.006 56);
+  --muted: oklch(0.444 0.011 73.6);
+  --faint: oklch(0.555 0.01 56.3);
+  --line: oklch(0.923 0.003 48.7);
+  --panel: oklch(0.97 0.001 106.4);
+  --rail: oklch(0.5 0.131 163.2);
+  --raildeep: oklch(0.45 0.11 163.2);
+  --signal: oklch(0.535 0.162 58.3);
+  --good: oklch(0.5 0.131 163.2);
+  --warn: oklch(0.535 0.162 58.3);
+  --bad: oklch(0.55 0.221 27.3);
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-sans-app), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-mono-app), ui-monospace, monospace;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-panel: var(--panel);
+  --color-rail: var(--rail);
+  --color-raildeep: var(--raildeep);
+  --color-signal: var(--signal);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
 }
