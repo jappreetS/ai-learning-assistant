@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Skill gaps" };
 
@@ -104,6 +105,20 @@ export default function SkillGapsPage() {
             </ul>
           </section>
         ))}
+      </div>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link
+          href="/roadmap/review"
+          className="inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep"
+        >
+          Review plan
+        </Link>
+        <Link
+          href="/role"
+          className="inline-flex rounded-full bg-surface px-4 py-2 text-sm font-semibold shadow-[inset_0_0_0_1px_var(--line)] hover:text-rail"
+        >
+          Back to Target role
+        </Link>
       </div>
     </main>
   );
