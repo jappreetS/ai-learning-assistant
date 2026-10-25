@@ -4,7 +4,7 @@ Personal AI-powered learning and career development platform for software engine
 
 ## Problem
 
-Engineers learn from books, videos, practice sites, and projects, but progress is hard to track and turn into demonstrable skill. Job descriptions expose skill gaps; closing those gaps needs a clear path from learning → practice → evidence.
+Engineers learn from books, videos, practice sites, and projects, but progress is hard to track and turn into demonstrable skill. Job descriptions expose skill gaps; closing those gaps needs a clear path from learning → practice → progress.
 
 ## What this product does (v1 direction)
 
@@ -12,7 +12,7 @@ Engineers learn from books, videos, practice sites, and projects, but progress i
 - Surface skill matches and gaps
 - Propose an adaptive learning roadmap (user reviews and approves)
 - Guide learning and practical mini-projects
-- Track evidence: Studied → Practiced → Applied → Demonstrated
+- Track progress: Studied → Practiced → Applied → Demonstrated
 
 ## Docs
 

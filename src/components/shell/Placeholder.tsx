@@ -10,11 +10,14 @@ export function Placeholder({
   next?: { href: string; label: string };
 }) {
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-8 sm:py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-      <p className="mt-2 max-w-xl text-sm text-muted">{description}</p>
+    <main className="mx-auto w-full max-w-3xl px-5 py-8 sm:py-10">
+      <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+      <p className="mt-3 max-w-xl text-muted">{description}</p>
       {next ? (
-        <Link href={next.href} className="mt-6 inline-block text-sm font-medium text-rail">
+        <Link
+          href={next.href}
+          className="mt-6 inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep"
+        >
           {next.label}
         </Link>
       ) : null}
