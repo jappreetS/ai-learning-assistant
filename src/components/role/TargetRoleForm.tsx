@@ -23,10 +23,10 @@ function Field({
   multiline?: boolean;
 }) {
   const className =
-    "mt-1.5 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-rail";
+    "mt-1.5 w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm outline-none focus:border-rail focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_12%,transparent)]";
 
   return (
-    <label className="block text-sm font-medium">
+    <label className="block text-sm font-semibold">
       {label}
       {multiline ? (
         <textarea
@@ -66,7 +66,7 @@ export function TargetRoleForm() {
 
   return (
     <div className="mt-8">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex w-fit max-w-full flex-wrap gap-1 rounded-full border border-line bg-panel p-1">
         {choices.map((item) => {
           const selected = choice === item.id;
           return (
@@ -74,7 +74,7 @@ export function TargetRoleForm() {
               key={item.id}
               type="button"
               onClick={() => setChoice(item.id)}
-              className={`rounded-full px-3 py-1.5 text-sm font-medium ${selected ? "bg-rail/10 text-rail" : "text-muted"
+              className={`rounded-full px-3.5 py-2 text-sm font-semibold ${selected ? "bg-surface text-raildeep shadow-sm" : "text-muted"
                 }`}
             >
               {item.label}
@@ -82,57 +82,59 @@ export function TargetRoleForm() {
           );
         })}
       </div>
-      {choice === "resume-jd" ? (
-        <div className="mt-6 flex flex-col gap-4">
-          <Field label="Role title" value={roleTitle} onChange={setRoleTitle} />
-          <Field label="Company" value={company} onChange={setCompany} />
-          <Field label="Resume excerpt" value={resume} onChange={setResume} multiline />
-          <Field
-            label="Job description"
-            value={jobDescription}
-            onChange={setJobDescription}
-            multiline
-          />
-        </div>
-      ) : choice === "jd-only" ? (
-        <div className="mt-6">
-          <Field
-            label="Job description"
-            value={onlyJobDescription}
-            onChange={setOnlyJobDescription}
-            multiline
-          />
-        </div>
-      ) : (
-        <div className="mt-6 flex flex-col gap-4">
-          <Field label="Role title" value={writtenTitle} onChange={setWrittenTitle} />
-          <Field
-            label="Skills this role needs"
-            value={writtenSkills}
-            onChange={setWrittenSkills}
-            multiline
-          />
-          <label className="block text-sm font-medium">
-            Current level
-            <select
-              className="mt-1.5 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-rail"
-              value={level}
-              onChange={(event) => setLevel(event.target.value)}
-            >
-              <option>Mid</option>
-              <option>Senior</option>
-              <option>Staff</option>
-              <option>Principal</option>
-            </select>
-          </label>
-        </div>
-      )}
-      <Link
-        href="/gaps"
-        className="mt-6 inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep"
-      >
-        Skill gaps
-      </Link>
+      <div className="mt-4 rounded-xl border border-line bg-surface p-5 shadow-sm">
+        {choice === "resume-jd" ? (
+          <div className="flex flex-col gap-4">
+            <Field label="Role title" value={roleTitle} onChange={setRoleTitle} />
+            <Field label="Company" value={company} onChange={setCompany} />
+            <Field label="Resume excerpt" value={resume} onChange={setResume} multiline />
+            <Field
+              label="Job description"
+              value={jobDescription}
+              onChange={setJobDescription}
+              multiline
+            />
+          </div>
+        ) : choice === "jd-only" ? (
+          <div>
+            <Field
+              label="Job description"
+              value={onlyJobDescription}
+              onChange={setOnlyJobDescription}
+              multiline
+            />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <Field label="Role title" value={writtenTitle} onChange={setWrittenTitle} />
+            <Field
+              label="Skills this role needs"
+              value={writtenSkills}
+              onChange={setWrittenSkills}
+              multiline
+            />
+            <label className="block text-sm font-semibold">
+              Current level
+              <select
+                className="mt-1.5 w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm outline-none focus:border-rail focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_12%,transparent)]"
+                value={level}
+                onChange={(event) => setLevel(event.target.value)}
+              >
+                <option>Mid</option>
+                <option>Senior</option>
+                <option>Staff</option>
+                <option>Principal</option>
+              </select>
+            </label>
+          </div>
+        )}
+        <Link
+          href="/gaps"
+          className="mt-6 inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep"
+        >
+          Skill gaps
+        </Link>
+      </div>
     </div>
   );
 }
