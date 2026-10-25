@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Roadmap" };
 
@@ -76,6 +77,22 @@ export default function RoadmapPage() {
               <p className="font-mono text-xs text-rail">{week.label}</p>
               <h2 className="mt-1 text-base font-semibold">{week.title}</h2>
               <p className="mt-1 text-sm text-muted">{week.detail}</p>
+              {week.state === "Current" ? (
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Link
+                    href="/sessions"
+                    className="inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep"
+                  >
+                    Sessions
+                  </Link>
+                  <Link
+                    href="/progress"
+                    className="inline-flex rounded-full bg-surface px-4 py-2 text-sm font-semibold shadow-[inset_0_0_0_1px_var(--line)] hover:text-rail"
+                  >
+                    Progress
+                  </Link>
+                </div>
+              ) : null}
             </div>
           </li>
         ))}
