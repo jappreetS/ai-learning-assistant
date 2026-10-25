@@ -9,40 +9,35 @@ const weeks = [
     state: "Complete",
     stateClass: "text-good",
     title: "Staff-shaped system design reps",
-    detail:
-      "Weekly frontend platform design prompt and a written tradeoff memo. Review it against a staff rubric.",
+    detail: "Two memos filed. Solid on constraints. Deepen failure modes next pass.",
   },
   {
     label: "W3–4",
     state: "Current",
     stateClass: "text-rail",
     title: "Architecture review practice",
-    detail:
-      "Critique two open-source frontend architectures. Write one RFC for a fictional multi-team change.",
+    detail: "Open-source critique 2 is underway. Draft RFC is due Friday.",
   },
   {
     label: "W5–7",
     state: "Upcoming",
     stateClass: "text-muted",
     title: "Design system governance project",
-    detail:
-      "Define a contribution model, a versioning policy, and a migration playbook, as if shipping to four teams.",
+    detail: "Starts week 5.",
   },
   {
     label: "W8–9",
     state: "Upcoming",
     stateClass: "text-muted",
     title: "Accessibility program spike",
-    detail:
-      "Audit one product surface to WCAG 2.2 AA. Write a remediation plan and an owner model.",
+    detail: "Weeks 8–9.",
   },
   {
     label: "W10–12",
     state: "Upcoming",
     stateClass: "text-muted",
     title: "Leadership presentation",
-    detail:
-      "A 30-minute architecture talk, plus the memos, RFCs, and before-and-after metrics for interviews.",
+    detail: "Weeks 10–12.",
   },
 ];
 
@@ -66,15 +61,32 @@ export default function RoadmapPage() {
         </div>
       </div>
       <ol className="mt-8 flex flex-col gap-3">
-        {weeks.map((week) => (
-          <li
-            key={week.label}
-            className={`grid gap-3 rounded-xl border bg-panel p-4 sm:grid-cols-[7rem_1fr] ${week.state === "Current" ? "border-rail" : "border-line"
-              }`}
-          >
-            <p className={`text-sm font-semibold ${week.stateClass}`}>{week.state}</p>
-            <div>
-              <p className="font-mono text-xs text-rail">{week.label}</p>
+        {weeks.map((week, index) => (
+          <li key={week.label} className="flex">
+            <div className="relative w-3 shrink-0">
+              {index > 0 ? (
+                <span className="absolute top-0 left-1/2 h-1/2 w-0.5 -translate-x-1/2 bg-rail" />
+              ) : null}
+              {index < weeks.length - 1 ? (
+                <span className="absolute top-1/2 left-1/2 h-[calc(50%+0.75rem)] w-0.5 -translate-x-1/2 bg-rail" />
+              ) : null}
+              <span
+                className={`absolute top-1/2 left-1/2 z-10 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-rail ${week.state === "Complete" ? "bg-rail" : "bg-paper"
+                  }`}
+              />
+            </div>
+            <div
+              className={`ml-4 flex-1 rounded-xl border bg-panel p-4 ${week.state === "Current"
+                  ? "border-rail shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_16%,transparent)]"
+                  : "border-line"
+                }`}
+            >
+              <p
+                className={`font-mono text-[11px] font-medium uppercase tracking-wider ${week.stateClass}`}
+              >
+                {week.state}
+              </p>
+              <p className="mt-2 font-mono text-xs text-rail">{week.label}</p>
               <h2 className="mt-1 text-base font-semibold">{week.title}</h2>
               <p className="mt-1 text-sm text-muted">{week.detail}</p>
               {week.state === "Current" ? (
