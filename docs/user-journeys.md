@@ -5,7 +5,7 @@
 - Audience: software engineers.
 - Entry points: resume + JD, JD only, or manually entered target role.
 - AI proposes a learning roadmap; the user reviews and approves before it becomes active.
-- Evidence states for skills: Studied → Practiced → Applied → Demonstrated.
+- Progress states for skills: Studied → Practiced → Applied → Demonstrated.
 - A user may have multiple independent roadmaps (e.g. two different target roles).
 
 ---
@@ -13,7 +13,7 @@
 ## Journey A — Start with resume + JD
 
 1. User uploads or pastes a resume and a job description.
-2. System analyzes skills: matches, gaps, and unclear/missing evidence.
+2. System analyzes skills: matches, gaps, and unclear/missing progress.
 3. User reviews the gap summary.
 4. System proposes a learning roadmap (topics, order, suggested practice).
 5. User edits or approves the roadmap.
@@ -22,7 +22,7 @@
 ## Journey B — Start with JD only
 
 1. User provides a job description (no resume).
-2. System infers required skills from the JD and treats coverage as unknown/gap unless the user adds evidence.
+2. System infers required skills from the JD and treats coverage as unknown/gap unless the user adds progress.
 3. User may optionally self-assess skills they already have.
 4. System proposes a roadmap from the remaining gaps.
 5. User approves (or edits) the roadmap.
@@ -37,23 +37,23 @@
 5. User approves (or edits) the roadmap.
 6. Roadmap becomes active.
 
-## Journey D — Follow the roadmap (evidence loop)
+## Journey D — Follow the roadmap (progress loop)
 
 1. User opens an active roadmap item (topic or skill).
 2. User studies material → marks or logs **Studied**.
 3. User practices (exercises, drills) → **Practiced**.
 4. User applies learning in a small project or real task → **Applied**.
 5. User produces demonstrable proof (project, write-up, reviewable artifact) → **Demonstrated**.
-6. Roadmap progress and priorities update from evidence state changes.
+6. Roadmap progress and priorities update from progress state changes.
 
-## Journey E — Log a learning session
+## Journey E — Sessions
 
 1. User logs a short session (what they did, topic/skill, time, source type: book / video / practice / project).
 2. System attaches the session to the relevant skill(s) and roadmap.
-3. Progress, gaps, and weekly priorities refresh from the new evidence.
+3. Progress, gaps, and weekly priorities refresh from the new progress.
 4. User sees an updated view of what’s done vs what to do next.
 
-## Journey F — Switch between independent roadmaps
+## Journey F — Plans
 
 1. User has more than one roadmap (e.g. Staff Frontend and Senior Full-Stack).
 2. User switches the active roadmap in the product.
