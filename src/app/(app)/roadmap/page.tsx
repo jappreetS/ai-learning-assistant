@@ -45,6 +45,8 @@ const weeks = [
   },
 ];
 
+const currentWeek = weeks.find((week) => week.state === "Current");
+
 export default function RoadmapPage() {
   return (
     <main className="mx-auto w-full max-w-3xl px-5 py-8 sm:py-10">
@@ -52,6 +54,16 @@ export default function RoadmapPage() {
       <p className="mt-3 max-w-xl text-muted">
         The Staff Frontend sample, already underway.
       </p>
+      <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4 rounded-xl border border-line bg-panel px-5 py-4 shadow-sm">
+        <div>
+          <p className="text-2xl font-bold tracking-tight">4 of 12</p>
+          <p className="text-sm text-muted">Week</p>
+        </div>
+        <div>
+          <p className="text-base font-semibold">{currentWeek?.title}</p>
+          <p className="text-sm text-muted">This week</p>
+        </div>
+      </div>
       <ol className="mt-8 flex flex-col gap-3">
         {weeks.map((week) => (
           <li
