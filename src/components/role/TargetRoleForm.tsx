@@ -54,6 +54,14 @@ export function TargetRoleForm() {
   const [jobDescription, setJobDescription] = useState(
     "We're hiring a Staff Frontend Engineer.",
   );
+  const [onlyJobDescription, setOnlyJobDescription] = useState(
+    "Senior Full-Stack Engineer — payments platform. Required: Node.js, PostgreSQL, React.",
+  );
+  const [writtenTitle, setWrittenTitle] = useState("Staff Frontend Engineer");
+  const [writtenSkills, setWrittenSkills] = useState(
+    "System design for frontend platforms\nDesign system governance\nWeb performance",
+  );
+  const [level, setLevel] = useState("Senior");
 
   return (
     <div className="mt-8">
@@ -85,8 +93,38 @@ export function TargetRoleForm() {
             multiline
           />
         </div>
+      ) : choice === "jd-only" ? (
+        <div className="mt-6">
+          <Field
+            label="Job description"
+            value={onlyJobDescription}
+            onChange={setOnlyJobDescription}
+            multiline
+          />
+        </div>
       ) : (
-        <p className="mt-6 text-sm text-muted">These fields are next.</p>
+        <div className="mt-6 flex flex-col gap-4">
+          <Field label="Role title" value={writtenTitle} onChange={setWrittenTitle} />
+          <Field
+            label="Skills this role needs"
+            value={writtenSkills}
+            onChange={setWrittenSkills}
+            multiline
+          />
+          <label className="block text-sm font-medium">
+            Current level
+            <select
+              className="mt-1.5 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-rail"
+              value={level}
+              onChange={(event) => setLevel(event.target.value)}
+            >
+              <option>Mid</option>
+              <option>Senior</option>
+              <option>Staff</option>
+              <option>Principal</option>
+            </select>
+          </label>
+        </div>
       )}
     </div>
   );
