@@ -100,18 +100,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
-      {open ? (
-        <button
-          type="button"
-          className="fixed inset-0 z-20 bg-ink/45 lg:hidden"
-          aria-label="Close navigation"
-          onClick={close}
-        />
-      ) : null}
-
       <aside
         id="sidebar"
-        className={`fixed inset-y-0 left-0 z-30 flex w-[min(280px,86vw)] flex-col gap-4 border-r border-line bg-surface/70 p-4 transition-transform lg:static lg:z-auto lg:w-auto lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-x-0 top-14 bottom-0 z-30 flex w-full flex-col gap-4 bg-surface p-4 transition-transform lg:static lg:inset-y-0 lg:z-auto lg:w-auto lg:translate-x-0 lg:border-r lg:border-line lg:bg-surface/70 ${open ? "translate-x-0" : "-translate-x-full"
           }`}
       >
         <Brand onNavigate={close} />
@@ -125,17 +116,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-h-screen min-w-0 flex-col">
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-line bg-paper/90 px-5 backdrop-blur">
+        <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-3 border-b border-line bg-paper/90 px-5 backdrop-blur">
           <button
             type="button"
-            className="rounded-md border border-line px-2.5 py-1.5 text-sm font-semibold lg:hidden"
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-ink lg:hidden"
             aria-expanded={open}
             aria-controls="sidebar"
+            aria-label={open ? "Close navigation" : "Open navigation"}
             onClick={() => setOpen((value) => !value)}
           >
-            Menu
+            {open ? (
+              <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+              </svg>
+            )}
           </button>
-          <p className="min-w-0 flex-1 text-[15px] font-bold tracking-tight">
+          <p className="hidden min-w-0 flex-1 text-[15px] font-bold tracking-tight lg:block">
             {isApplications ? "Job Applications" : "AI Learning Assistant"}
           </p>
           <Link
