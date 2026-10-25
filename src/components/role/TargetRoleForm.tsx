@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 const choices = [
   { id: "resume-jd", label: "Resume and job description" },
@@ -126,6 +127,12 @@ export function TargetRoleForm() {
           </label>
         </div>
       )}
+      <Link
+        href="/gaps"
+        className="mt-6 inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep"
+      >
+        Skill gaps
+      </Link>
     </div>
   );
 }
