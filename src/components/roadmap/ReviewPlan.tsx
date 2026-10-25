@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 const weeks = [
   {
@@ -95,6 +96,20 @@ export function ReviewPlan() {
           </li>
         ))}
       </ol>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link
+          href="/roadmap"
+          className="inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep"
+        >
+          Approve
+        </Link>
+        <Link
+          href="/gaps"
+          className="inline-flex rounded-full bg-surface px-4 py-2 text-sm font-semibold shadow-[inset_0_0_0_1px_var(--line)] hover:text-rail"
+        >
+          Skill gaps
+        </Link>
+      </div>
     </main>
   );
 }
