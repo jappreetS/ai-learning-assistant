@@ -1,4 +1,3 @@
-import { Placeholder } from "@/components/shell/Placeholder";
 import Link from "next/link";
 
 const steps = [
