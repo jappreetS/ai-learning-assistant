@@ -135,9 +135,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             Menu
           </button>
-          <h1 className="min-w-0 flex-1 text-[15px] font-bold tracking-tight">
+          <p className="min-w-0 flex-1 text-[15px] font-bold tracking-tight">
             {isApplications ? "Job Applications" : "AI Learning Assistant"}
-          </h1>
+          </p>
           <Link
             href={isApplications ? "/" : "/role"}
             onClick={close}
