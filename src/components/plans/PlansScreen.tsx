@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { Button } from "@/components/ui/Button";
+
 const plans = [
   {
     id: "staff-fe",
@@ -44,8 +46,8 @@ export function PlansScreen() {
               type="button"
               onClick={() => setActiveId(plan.id)}
               className={`rounded-xl border bg-surface p-5 text-left shadow-sm ${selected
-                  ? "border-rail shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_16%,transparent)]"
-                  : "border-line"
+                ? "border-rail shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_16%,transparent)]"
+                : "border-line"
                 }`}
             >
               {selected ? (
@@ -68,6 +70,12 @@ export function PlansScreen() {
         })}
       </div>
       <p className="mt-6 text-sm text-muted">{active.role} is active.</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button href="/roadmap">Roadmap</Button>
+        <Button href="/role" variant="quiet">
+          Target role
+        </Button>
+      </div>
     </main>
   );
 }
