@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Placeholder } from "@/components/shell/Placeholder";
+import { PlansScreen } from "@/components/plans/PlansScreen";
 
 export const metadata: Metadata = { title: "Plans" };
 
 export default function PlansPage() {
-  return (
-    <Placeholder
-      title="Plans"
-      description="Switch the active plan. Each plan keeps its own gaps, sessions, and progress."
-      next={{ href: "/", label: "Home" }}
-    />
-  );
+  return <PlansScreen />;
 }
