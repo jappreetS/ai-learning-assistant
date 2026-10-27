@@ -113,9 +113,9 @@ export function SessionsScreen() {
         <section className={panelClass}>
           <h2 className="text-base font-semibold">Recent sessions</h2>
           <ol className="mt-4">
-            {sessions.map((session) => (
+            {sessions.map((session, index) => (
               <li
-                key={session.title}
+                key={`${session.title}-${index}`}
                 className="border-b border-line py-3 last:border-b-0"
               >
                 <p className="font-mono text-xs text-muted">
