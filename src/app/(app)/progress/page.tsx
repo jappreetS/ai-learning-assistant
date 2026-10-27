@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = { title: "Progress" };
 
@@ -92,6 +93,12 @@ export default function ProgressPage() {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="mt-6 flex flex-wrap gap-2">
+        <Button href="/sessions">Sessions</Button>
+        <Button href="/roadmap" variant="quiet">
+          Roadmap
+        </Button>
       </div>
     </main>
   );
