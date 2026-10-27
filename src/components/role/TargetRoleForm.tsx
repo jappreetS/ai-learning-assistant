@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 
+import { Field } from "@/components/ui/Field";
+
 const choices = [
   { id: "resume-jd", label: "Resume and job description" },
   { id: "jd-only", label: "Job description only" },
@@ -10,40 +12,6 @@ const choices = [
 ] as const;
 
 type Choice = (typeof choices)[number]["id"];
-
-function Field({
-  label,
-  value,
-  onChange,
-  multiline = false,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  multiline?: boolean;
-}) {
-  const className =
-    "mt-1.5 w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm outline-none focus:border-rail focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_12%,transparent)]";
-
-  return (
-    <label className="block text-sm font-semibold">
-      {label}
-      {multiline ? (
-        <textarea
-          className={`${className} min-h-32`}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-        />
-      ) : (
-        <input
-          className={className}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-        />
-      )}
-    </label>
-  );
-}
 
 export function TargetRoleForm() {
   const [choice, setChoice] = useState<Choice>("resume-jd");
@@ -113,19 +81,12 @@ export function TargetRoleForm() {
               onChange={setWrittenSkills}
               multiline
             />
-            <label className="block text-sm font-semibold">
-              Current level
-              <select
-                className="mt-1.5 w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm outline-none focus:border-rail focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_12%,transparent)]"
-                value={level}
-                onChange={(event) => setLevel(event.target.value)}
-              >
-                <option>Mid</option>
-                <option>Senior</option>
-                <option>Staff</option>
-                <option>Principal</option>
-              </select>
-            </label>
+            <Field
+              label="Current level"
+              value={level}
+              onChange={setLevel}
+              options={["Mid", "Senior", "Staff", "Principal"]}
+            />
           </div>
         )}
         <Link
