@@ -2,8 +2,16 @@
 
 import { useState } from "react";
 import { Field } from "@/components/ui/Field";
+import { Button } from "@/components/ui/Button";
 
-const sessions = [
+function sessionDate(value: string) {
+  return new Date(`${value}T00:00:00`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+const sampleSessions = [
   {
     date: "Oct 22",
     duration: "45 min",
@@ -37,6 +45,7 @@ const sessions = [
 const panelClass = "rounded-xl border border-line bg-surface p-5 shadow-sm";
 
 export function SessionsScreen() {
+  const [sessions, setSessions] = useState(sampleSessions);
   const [date, setDate] = useState("2026-10-22");
   const [duration, setDuration] = useState("45 min");
   const [skill, setSkill] = useState("Architecture reviews and RFCs");
@@ -44,6 +53,19 @@ export function SessionsScreen() {
   const [note, setNote] = useState(
     "Drafted sections 1–2 of the multi-team cache invalidation RFC. Listed alternatives and failure modes.",
   );
+
+  function saveSession() {
+    setSessions((current) => [
+      {
+        date: sessionDate(date),
+        duration,
+        stage,
+        title: skill,
+        note,
+      },
+      ...current,
+    ]);
+  }
 
   return (
     <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:py-10">
@@ -80,6 +102,12 @@ export function SessionsScreen() {
               options={["Studied", "Practiced", "Applied", "Demonstrated"]}
             />
             <Field label="What happened" value={note} onChange={setNote} multiline />
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={saveSession}>Save session</Button>
+              <Button href="/progress" variant="quiet">
+                Progress
+              </Button>
+            </div>
           </div>
         </section>
         <section className={panelClass}>
