@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Field } from "@/components/ui/Field";
 
@@ -31,6 +31,60 @@ export function TargetRoleForm() {
     "System design for frontend platforms\nDesign system governance\nWeb performance",
   );
   const [level, setLevel] = useState("Senior");
+
+  const router = useRouter();
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+    async function load() {
+      const response = await fetch("/api/v1/target-roles");
+      const role: {
+        source: Choice;
+        roleTitle: string | null;
+        company: string | null;
+        resumeExcerpt: string | null;
+        jobDescription: string | null;
+        writtenSkills: string | null;
+        level: string | null;
+      } | null = await response.json();
+      if (!role || ignore) return;
+      setChoice(role.source);
+      if (role.source === "resume-jd") {
+        setRoleTitle(role.roleTitle ?? "");
+        setCompany(role.company ?? "");
+        setResume(role.resumeExcerpt ?? "");
+        setJobDescription(role.jobDescription ?? "");
+      } else if (role.source === "jd-only") {
+        setOnlyJobDescription(role.jobDescription ?? "");
+      } else {
+        setWrittenTitle(role.roleTitle ?? "");
+        setWrittenSkills(role.writtenSkills ?? "");
+        setLevel(role.level ?? "Senior");
+      }
+    }
+    void load();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  async function saveAndOpenGaps() {
+    setSaving(true);
+    const body =
+      choice === "resume-jd"
+        ? { source: choice, roleTitle, company, resumeExcerpt: resume, jobDescription }
+        : choice === "jd-only"
+          ? { source: choice, jobDescription: onlyJobDescription }
+          : { source: choice, roleTitle: writtenTitle, writtenSkills, level };
+    const response = await fetch("/api/v1/target-roles", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    setSaving(false);
+    if (response.ok) router.push("/gaps");
+  }
 
   return (
     <div className="mt-8">
@@ -89,12 +143,14 @@ export function TargetRoleForm() {
             />
           </div>
         )}
-        <Link
-          href="/gaps"
+        <button
+          type="button"
+          onClick={saveAndOpenGaps}
+          disabled={saving}
           className="mt-6 inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep"
         >
           Skill gaps
-        </Link>
+        </button>
       </div>
     </div>
   );

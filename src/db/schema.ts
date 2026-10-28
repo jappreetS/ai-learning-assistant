@@ -1,4 +1,4 @@
-import { boolean, date, integer, pgEnum, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { boolean, date, integer, pgEnum, pgTable, text, uuid, timestamp } from "drizzle-orm/pg-core";
 
 export const stage = pgEnum("stage", [
   "studied",
@@ -71,6 +71,7 @@ export const targetRoles = pgTable("target_roles", {
   jobDescription: text("job_description"),
   writtenSkills: text("written_skills"),
   level: text("level"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const skillGaps = pgTable("skill_gaps", {
