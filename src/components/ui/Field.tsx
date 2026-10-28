@@ -1,3 +1,13 @@
+type Choice = string | { value: string; label: string };
+
+function choiceValue(choice: Choice) {
+  return typeof choice === "string" ? choice : choice.value;
+}
+
+function choiceLabel(choice: Choice) {
+  return typeof choice === "string" ? choice : choice.label;
+}
+
 export function Field({
   label,
   value,
@@ -10,7 +20,7 @@ export function Field({
   value: string;
   onChange: (value: string) => void;
   multiline?: boolean;
-  options?: string[];
+  options?: Choice[];
   type?: string;
 }) {
   const className =
@@ -26,7 +36,9 @@ export function Field({
           onChange={(event) => onChange(event.target.value)}
         >
           {options.map((option) => (
-            <option key={option}>{option}</option>
+            <option key={choiceValue(option)} value={choiceValue(option)}>
+              {choiceLabel(option)}
+            </option>
           ))}
         </select>
       ) : multiline ? (

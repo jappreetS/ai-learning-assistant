@@ -88,6 +88,7 @@ export function SessionsScreen() {
       return;
     }
     setMessage("");
+    setNote("");
     await load(planId);
   }
 
@@ -112,7 +113,7 @@ export function SessionsScreen() {
               label="Skill"
               value={skillId}
               onChange={setSkillId}
-              options={skills.map((skill) => skill.id)}
+              options={skills.map((skill) => ({ value: skill.id, label: skill.name }))}
             />
             <Field label="Stage" value={stage} onChange={setStage} options={stages} />
             <Field label="What happened" value={note} onChange={setNote} multiline />
