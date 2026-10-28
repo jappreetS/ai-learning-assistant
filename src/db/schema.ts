@@ -14,6 +14,7 @@ export const plans = pgTable("plans", {
   lengthWeeks: integer("length_weeks").notNull(),
   currentWeek: integer("current_week").notNull(),
   active: boolean("active").notNull().default(false),
+  approved: boolean("approved").notNull().default(false),
 });
 
 export const planWeeks = pgTable("plan_weeks", {

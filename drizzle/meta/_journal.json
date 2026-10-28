@@ -15,6 +15,13 @@
       "when": 1793183363809,
       "tag": "0001_lean_flatman",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793184477733,
+      "tag": "0002_far_ultron",
+      "breakpoints": true
     }
   ]
 }
