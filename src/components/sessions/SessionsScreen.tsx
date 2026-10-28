@@ -1,8 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { Field } from "@/components/ui/Field";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
+
+type Skill = { id: string; name: string };
+type Session = {
+  id: string;
+  skillId: string;
+  occurredOn: string;
+  duration: string;
+  stage: string;
+  note: string;
+};
+
+const stages = ["Studied", "Practiced", "Applied", "Demonstrated"];
+const panelClass = "rounded-xl border border-line bg-surface p-5 shadow-sm";
 
 function sessionDate(value: string) {
   return new Date(`${value}T00:00:00`).toLocaleDateString("en-US", {
@@ -11,60 +25,71 @@ function sessionDate(value: string) {
   });
 }
 
-const sampleSessions = [
-  {
-    date: "Oct 22",
-    duration: "45 min",
-    stage: "Practiced",
-    title: "RFC draft — cache invalidation",
-    note: "Wrote the problem statement and two alternatives. Blocked on real latency numbers.",
-  },
-  {
-    date: "Oct 20",
-    duration: "90 min",
-    stage: "Studied",
-    title: "Critique: Remix data loading model",
-    note: "Annotated tradeoffs against the Next.js App Router for multi-zone apps.",
-  },
-  {
-    date: "Oct 18",
-    duration: "60 min",
-    stage: "Applied",
-    title: "Performance memo rewrite",
-    note: "Reframed the LCP work as a platform pattern other teams can reuse.",
-  },
-  {
-    date: "Oct 15",
-    duration: "40 min",
-    stage: "Practiced",
-    title: "System design prompt #2",
-    note: "Designed a notification inbox for 10M users. Weak on multi-region consistency.",
-  },
-];
-
-const panelClass = "rounded-xl border border-line bg-surface p-5 shadow-sm";
-
 export function SessionsScreen() {
-  const [sessions, setSessions] = useState(sampleSessions);
+  const [planId, setPlanId] = useState<string | null>(null);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
   const [date, setDate] = useState("2026-10-22");
   const [duration, setDuration] = useState("45 min");
-  const [skill, setSkill] = useState("Architecture reviews and RFCs");
+  const [skillId, setSkillId] = useState("");
   const [stage, setStage] = useState("Practiced");
   const [note, setNote] = useState(
-    "Drafted sections 1–2 of the multi-team cache invalidation RFC. Listed alternatives and failure modes.",
+    "Wrote the problem statement and two alternatives.",
   );
+  const [message, setMessage] = useState("");
 
-  function saveSession() {
-    setSessions((current) => [
-      {
-        date: sessionDate(date),
-        duration,
-        stage,
-        title: skill,
-        note,
-      },
-      ...current,
+  async function load(activePlanId: string) {
+    const [skillResponse, sessionResponse] = await Promise.all([
+      fetch(`/api/v1/plans/${activePlanId}/skills`),
+      fetch(`/api/v1/plans/${activePlanId}/sessions`),
     ]);
+    const skillRows: Skill[] = await skillResponse.json();
+    setSkills(skillRows);
+    setSessions(await sessionResponse.json());
+    setSkillId((current) =>
+      skillRows.some((skill) => skill.id === current) ? current : (skillRows[0]?.id ?? ""),
+    );
+  }
+
+  useEffect(() => {
+    let ignore = false;
+    async function start() {
+      const response = await fetch("/api/v1/plans");
+      const plans: { id: string; active: boolean }[] = await response.json();
+      const active = plans.find((plan) => plan.active);
+      if (!active || ignore) {
+        if (!ignore) setMessage("No plan is active.");
+        return;
+      }
+      setPlanId(active.id);
+      await load(active.id);
+    }
+    void start();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  async function saveSession() {
+    if (!planId || !skillId) return;
+    const response = await fetch(`/api/v1/plans/${planId}/sessions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        skillId,
+        occurredOn: date,
+        duration,
+        stage: stage.toLowerCase(),
+        note,
+      }),
+    });
+    if (!response.ok) {
+      setMessage("Could not save the session.");
+      return;
+    }
+    setMessage("");
+    setNote("");
+    await load(planId);
   }
 
   return (
@@ -86,21 +111,11 @@ export function SessionsScreen() {
             />
             <Field
               label="Skill"
-              value={skill}
-              onChange={setSkill}
-              options={[
-                "Frontend system design",
-                "Architecture reviews and RFCs",
-                "Design system governance",
-                "Accessibility program leadership",
-              ]}
+              value={skillId}
+              onChange={setSkillId}
+              options={skills.map((skill) => ({ value: skill.id, label: skill.name }))}
             />
-            <Field
-              label="Stage"
-              value={stage}
-              onChange={setStage}
-              options={["Studied", "Practiced", "Applied", "Demonstrated"]}
-            />
+            <Field label="Stage" value={stage} onChange={setStage} options={stages} />
             <Field label="What happened" value={note} onChange={setNote} multiline />
             <div className="flex flex-wrap gap-2">
               <Button onClick={saveSession}>Save session</Button>
@@ -113,21 +128,23 @@ export function SessionsScreen() {
         <section className={panelClass}>
           <h2 className="text-base font-semibold">Recent sessions</h2>
           <ol className="mt-4">
-            {sessions.map((session, index) => (
-              <li
-                key={`${session.title}-${index}`}
-                className="border-b border-line py-3 last:border-b-0"
-              >
-                <p className="font-mono text-xs text-muted">
-                  {session.date} · {session.duration} · {session.stage}
-                </p>
-                <h3 className="mt-1 text-base font-semibold">{session.title}</h3>
-                <p className="mt-1 text-sm text-muted">{session.note}</p>
-              </li>
-            ))}
+            {sessions.map((session) => {
+              const skill = skills.find((item) => item.id === session.skillId);
+              return (
+                <li key={session.id} className="border-b border-line py-3 last:border-b-0">
+                  <p className="font-mono text-xs text-muted">
+                    {sessionDate(session.occurredOn)} · {session.duration} ·{" "}
+                    {session.stage.charAt(0).toUpperCase() + session.stage.slice(1)}
+                  </p>
+                  <h3 className="mt-1 text-base font-semibold">{skill?.name ?? "Skill"}</h3>
+                  <p className="mt-1 text-sm text-muted">{session.note}</p>
+                </li>
+              );
+            })}
           </ol>
         </section>
       </div>
+      {message ? <p className="mt-6 text-sm text-muted">{message}</p> : null}
     </main>
   );
 }
