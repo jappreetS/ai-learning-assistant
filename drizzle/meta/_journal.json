@@ -22,6 +22,13 @@
       "when": 1793184477733,
       "tag": "0002_far_ultron",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793202488829,
+      "tag": "0003_wonderful_wild_pack",
+      "breakpoints": true
     }
   ]
 }
