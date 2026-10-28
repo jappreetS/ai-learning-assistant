@@ -1,108 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-const weeks = [
-  {
-    label: "W1–2",
-    title: "Staff-shaped system design reps",
-    detail:
-      "Weekly frontend platform design prompt and a written tradeoff memo. Review it against a staff rubric.",
-    skills: ["System design", "Written RFCs"],
-  },
-  {
-    label: "W3–4",
-    title: "Architecture review practice",
-    detail:
-      "Critique two open-source frontend architectures. Write one RFC for a fictional multi-team change.",
-    skills: ["RFCs", "Leadership signal"],
-  },
-  {
-    label: "W5–7",
-    title: "Design system governance project",
-    detail:
-      "Define a contribution model, a versioning policy, and a migration playbook, as if shipping to four teams.",
-    skills: ["Design systems", "Governance"],
-  },
-  {
-    label: "W8–9",
-    title: "Accessibility program spike",
-    detail:
-      "Audit one product surface to WCAG 2.2 AA. Write a remediation plan and an owner model.",
-    skills: ["Accessibility"],
-  },
-  {
-    label: "W10–12",
-    title: "Leadership presentation",
-    detail:
-      "A 30-minute architecture talk, plus the memos, RFCs, and before-and-after metrics for interviews.",
-    skills: ["Demonstrated", "Interview ready"],
-  },
-];
+type Week = { id: string; label: string; title: string; detail: string };
 
 export function ReviewPlan() {
-  const [details, setDetails] = useState(weeks.map((week) => week.detail));
-  const [editing, setEditing] = useState<string | null>(null);
+  const router = useRouter();
+  const [planId, setPlanId] = useState<string | null>(null);
+  const [weeks, setWeeks] = useState<Week[]>([]);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    let ignore = false;
+    async function load() {
+      const planResponse = await fetch("/api/v1/plans");
+      const plans: { id: string; active: boolean }[] = await planResponse.json();
+      const active = plans.find((plan) => plan.active);
+      if (!active || ignore) {
+        if (!ignore) setMessage("No plan is active.");
+        return;
+      }
+      setPlanId(active.id);
+      const weekResponse = await fetch(`/api/v1/plans/${active.id}/weeks`);
+      const rows: Week[] = await weekResponse.json();
+      if (!ignore) setWeeks(rows);
+    }
+    void load();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  async function approve() {
+    if (!planId) return;
+    const response = await fetch(`/api/v1/plans/${planId}/approve`, { method: "POST" });
+    if (response.ok) router.push("/roadmap");
+  }
 
   return (
     <main className="mx-auto w-full max-w-3xl px-5 py-8 sm:py-10">
       <h1 className="text-3xl font-bold tracking-tight">Review plan</h1>
       <p className="mt-3 max-w-xl text-muted">
-        A 12-week Staff Frontend sample. It becomes the roadmap when you approve it.
+        The active plan’s weeks. Approve it to keep this as the roadmap.
       </p>
       <ol className="mt-8 flex flex-col gap-3">
-        {weeks.map((week, index) => (
-          <li
-            key={week.label}
-            className="grid gap-3 rounded-xl border border-line bg-panel p-4 sm:grid-cols-[4.5rem_1fr_auto]"
-          >
+        {weeks.map((week) => (
+          <li key={week.id} className="grid gap-3 rounded-xl border border-line bg-panel p-4 sm:grid-cols-[4.5rem_1fr]">
             <p className="font-mono text-xs text-rail">{week.label}</p>
             <div>
               <h2 className="text-base font-semibold">{week.title}</h2>
-              {editing === week.label ? (
-                <textarea
-                  className="mt-1 min-h-24 w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm outline-none focus:border-rail focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_12%,transparent)]"
-                  value={details[index]}
-                  onChange={(event) =>
-                    setDetails((current) =>
-                      current.map((detail, detailIndex) =>
-                        detailIndex === index ? event.target.value : detail,
-                      ),
-                    )
-                  }
-                />
-              ) : (
-                <p className="mt-1 text-sm text-muted">{details[index]}</p>
-              )}
-              <ul className="mt-3 flex flex-wrap gap-2">
-                {week.skills.map((skill) => (
-                  <li
-                    key={skill}
-                    className="rounded-full border border-line bg-surface px-2 py-0.5 text-xs text-muted"
-                  >
-                    {skill}
-                  </li>
-                ))}
-              </ul>
+              <p className="mt-1 text-sm text-muted">{week.detail}</p>
             </div>
-            <button
-              type="button"
-              onClick={() => setEditing(editing === week.label ? null : week.label)}
-              className="text-sm font-semibold text-muted hover:text-ink"
-            >
-              {editing === week.label ? "Done" : "Edit"}
-            </button>
           </li>
         ))}
       </ol>
+      {message ? <p className="mt-6 text-sm text-muted">{message}</p> : null}
       <div className="mt-6 flex flex-wrap gap-3">
-        <Link
-          href="/roadmap"
+        <button
+          type="button"
+          onClick={approve}
           className="inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep"
         >
           Approve
-        </Link>
+        </button>
         <Link
           href="/gaps"
           className="inline-flex rounded-full bg-surface px-4 py-2 text-sm font-semibold shadow-[inset_0_0_0_1px_var(--line)] hover:text-rail"
