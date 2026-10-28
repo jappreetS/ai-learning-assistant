@@ -51,3 +51,34 @@ export const sessions = pgTable("sessions", {
   stage: stage("stage").notNull(),
   note: text("note").notNull(),
 });
+
+export const targetRoleSource = pgEnum("target_role_source", [
+  "resume-jd",
+  "jd-only",
+  "written",
+]);
+
+export const gapKind = pgEnum("gap_kind", ["match", "gap", "proof"]);
+
+export const targetRoles = pgTable("target_roles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  applicationId: uuid("application_id"),
+  source: targetRoleSource("source").notNull(),
+  roleTitle: text("role_title"),
+  company: text("company"),
+  resumeExcerpt: text("resume_excerpt"),
+  jobDescription: text("job_description"),
+  writtenSkills: text("written_skills"),
+  level: text("level"),
+});
+
+export const skillGaps = pgTable("skill_gaps", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  targetRoleId: uuid("target_role_id")
+    .notNull()
+    .references(() => targetRoles.id, { onDelete: "cascade" }),
+  kind: gapKind("kind").notNull(),
+  name: text("name").notNull(),
+  detail: text("detail").notNull(),
+  position: integer("position").notNull(),
+});
