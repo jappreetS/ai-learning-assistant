@@ -1,6 +1,6 @@
 # Learning data model
 
-The screens still show a fixed sample. These tables are the stored shape of that sample. A later task reads them. This note does not connect the pages.
+These tables are what the screens store. A week, a skill, and a session belong to a plan. A job application may point at a plan.
 
 ## plans
 
@@ -26,6 +26,14 @@ One row is one sitting of study.
 
 It stores the date, the duration, the stage for that sitting, and the note. It stores the plan’s id and the skill’s id. The Sessions screen lists a plan’s sessions. The skill id says which skill that sitting was for.
 
+## job_applications
+
+One row is one application.
+
+Staff Frontend Engineer at Northwind Labs can be one row. The stage is Saved, Applied, or Interviewing. The row may store a plan’s id. Job Applications lists these rows. When the plan is deleted, the application remains and its plan id becomes empty.
+
 ## How a row points at another
 
 A week points at a plan. A skill points at a plan. A session points at a plan and at a skill. The plan’s id is stored on the week, the skill, and the session, so each plan keeps its own weeks, skills, and sessions.
+
+An application may point at a plan. The plan does not own the application, so deleting the plan only clears that id.
