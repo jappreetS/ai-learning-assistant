@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const groups = [
   { kind: "match", label: "Matches", pill: "Match", pillClass: "bg-good/15 text-good" },
@@ -13,12 +14,17 @@ type Gap = { id: string; kind: "match" | "gap" | "proof"; name: string; detail: 
 
 export function SkillGapsScreen() {
   const [gaps, setGaps] = useState<Gap[] | null>(null);
+  const router = useRouter();
+  const [roleId, setRoleId] = useState<string | null>(null);
+  const [proposing, setProposing] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     let ignore = false;
     async function load() {
       const roleResponse = await fetch("/api/v1/target-roles");
       const role: { id: string } | null = await roleResponse.json();
+      setRoleId(role?.id ?? null);
       if (!role || ignore) {
         if (!ignore) setGaps([]);
         return;
@@ -32,6 +38,20 @@ export function SkillGapsScreen() {
       ignore = true;
     };
   }, []);
+
+  async function propose() {
+    if (!roleId) return;
+    setProposing(true);
+    setMessage("");
+    const response = await fetch(`/api/v1/target-roles/${roleId}/plan`, { method: "POST" });
+    setProposing(false);
+    if (!response.ok) {
+      setMessage("Could not propose a plan.");
+      return;
+    }
+    const body: { plan: { id: string } } = await response.json();
+    router.push(`/roadmap/review?plan=${body.plan.id}`);
+  }
 
   const saved = gaps ?? [];
 
@@ -74,9 +94,14 @@ export function SkillGapsScreen() {
         ))}
       </div>
       <div className="mt-6 flex flex-wrap gap-3">
-        <Link href="/roadmap/review" className="inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep">
+        <button
+          type="button"
+          onClick={propose}
+          disabled={proposing || !roleId}
+          className="inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep"
+        >
           Review plan
-        </Link>
+        </button>
         <Link href="/role" className="inline-flex rounded-full bg-surface px-4 py-2 text-sm font-semibold shadow-[inset_0_0_0_1px_var(--line)] hover:text-rail">
           Back to Target role
         </Link>

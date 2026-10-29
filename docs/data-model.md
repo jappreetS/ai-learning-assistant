@@ -8,6 +8,8 @@ One row is one roadmap.
 
 Staff Frontend Engineer at Northwind Labs is one row. Senior Full-Stack Engineer at Harbor Payments is another. The Plans screen lists these rows. One plan is the active plan.
 
+A plan also records whether the model wrote its weeks.
+
 ## plan_weeks
 
 One row is one block of weeks on a plan.

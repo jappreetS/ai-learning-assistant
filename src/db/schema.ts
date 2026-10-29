@@ -15,6 +15,7 @@ export const plans = pgTable("plans", {
   currentWeek: integer("current_week").notNull(),
   active: boolean("active").notNull().default(false),
   approved: boolean("approved").notNull().default(false),
+  fromModel: boolean("from_model").notNull().default(false),
 });
 
 export const applicationStage = pgEnum("application_stage", [
