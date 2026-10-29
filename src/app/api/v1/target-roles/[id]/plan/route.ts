@@ -1,7 +1,7 @@
 import { asc, eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
-import { skillGaps, targetRoles } from "@/db/schema";
+import { planWeeks, plans, skillGaps, targetRoles } from "@/db/schema";
 import { askForPlan } from "@/server/proposed-plan";
 
 export async function POST(_request: Request, context: { params: Promise<{ id: string }> }) {
@@ -21,8 +21,32 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
   }
 
   try {
-    const plan = await askForPlan(gaps);
-    return Response.json(plan);
+    const proposal = await askForPlan(gaps);
+    const saved = await db.transaction(async (tx) => {
+      const [plan] = await tx
+        .insert(plans)
+        .values({
+          roleTitle: role.roleTitle?.trim() || "Target role",
+          company: role.company?.trim() || "Not specified",
+          lengthWeeks: proposal.lengthWeeks,
+          currentWeek: 1,
+          active: false,
+          approved: false,
+        })
+        .returning();
+      const weeks = await tx
+        .insert(planWeeks)
+        .values(
+          proposal.weeks.map((week, index) => ({
+            ...week,
+            planId: plan.id,
+            position: index + 1,
+          })),
+        )
+        .returning();
+      return { plan, weeks };
+    });
+    return Response.json(saved);
   } catch {
     return Response.json({ error: "The model did not return a plan" }, { status: 502 });
   }
