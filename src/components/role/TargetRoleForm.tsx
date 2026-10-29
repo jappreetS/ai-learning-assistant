@@ -34,6 +34,7 @@ export function TargetRoleForm() {
 
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     let ignore = false;
@@ -71,6 +72,7 @@ export function TargetRoleForm() {
 
   async function saveAndOpenGaps() {
     setSaving(true);
+    setMessage("");
     const body =
       choice === "resume-jd"
         ? { source: choice, roleTitle, company, resumeExcerpt: resume, jobDescription }
@@ -82,8 +84,19 @@ export function TargetRoleForm() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
     });
+    if (!response.ok) {
+      setSaving(false);
+      setMessage("Could not save the role.");
+      return;
+    }
+    const role: { id: string } = await response.json();
+    const analysis = await fetch(`/api/v1/target-roles/${role.id}/analysis`, { method: "POST" });
     setSaving(false);
-    if (response.ok) router.push("/gaps");
+    if (!analysis.ok) {
+      setMessage("The model did not return skill gaps.");
+      return;
+    }
+    router.push("/gaps");
   }
 
   return (
@@ -151,6 +164,7 @@ export function TargetRoleForm() {
         >
           Skill gaps
         </button>
+        {message ? <p className="mt-4 text-sm text-muted">{message}</p> : null}
       </div>
     </div>
   );
