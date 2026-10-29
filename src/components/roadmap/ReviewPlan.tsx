@@ -2,28 +2,36 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
+type Plan = { id: string; fromModel: boolean };
 type Week = { id: string; label: string; title: string; detail: string };
 
 export function ReviewPlan() {
   const router = useRouter();
+  const requestedId = useSearchParams().get("plan");
   const [planId, setPlanId] = useState<string | null>(null);
+  const [fromModel, setFromModel] = useState(true);
   const [weeks, setWeeks] = useState<Week[]>([]);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     let ignore = false;
     async function load() {
-      const planResponse = await fetch("/api/v1/plans");
-      const plans: { id: string; active: boolean }[] = await planResponse.json();
-      const active = plans.find((plan) => plan.active);
-      if (!active || ignore) {
-        if (!ignore) setMessage("No plan is active.");
+      if (!requestedId) {
+        if (!ignore) setMessage("No proposed plan.");
         return;
       }
-      setPlanId(active.id);
-      const weekResponse = await fetch(`/api/v1/plans/${active.id}/weeks`);
+      const planResponse = await fetch("/api/v1/plans");
+      const plans: Plan[] = await planResponse.json();
+      const plan = plans.find((item) => item.id === requestedId);
+      if (!plan || ignore) {
+        if (!ignore) setMessage("No proposed plan.");
+        return;
+      }
+      setPlanId(plan.id);
+      setFromModel(plan.fromModel);
+      const weekResponse = await fetch(`/api/v1/plans/${plan.id}/weeks`);
       const rows: Week[] = await weekResponse.json();
       if (!ignore) setWeeks(rows);
     }
@@ -31,20 +39,32 @@ export function ReviewPlan() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [requestedId]);
 
   async function approve() {
     if (!planId) return;
-    const response = await fetch(`/api/v1/plans/${planId}/approve`, { method: "POST" });
-    if (response.ok) router.push("/roadmap");
+    const approved = await fetch(`/api/v1/plans/${planId}/approve`, { method: "POST" });
+    if (!approved.ok) {
+      setMessage("Could not approve the plan.");
+      return;
+    }
+    const activated = await fetch(`/api/v1/plans/${planId}/activate`, { method: "POST" });
+    if (!activated.ok) {
+      setMessage("Could not make the plan active.");
+      return;
+    }
+    router.push("/roadmap");
   }
 
   return (
     <main className="mx-auto w-full max-w-3xl px-5 py-8 sm:py-10">
       <h1 className="text-3xl font-bold tracking-tight">Review plan</h1>
       <p className="mt-3 max-w-xl text-muted">
-        The active plan’s weeks. Approve it to keep this as the roadmap.
+        These weeks were proposed from the skill gaps. Approve to make this the roadmap.
       </p>
+      {planId && !fromModel ? (
+        <p className="mt-3 text-sm text-muted">The model did not write this plan.</p>
+      ) : null}
       <ol className="mt-8 flex flex-col gap-3">
         {weeks.map((week) => (
           <li key={week.id} className="grid gap-3 rounded-xl border border-line bg-panel p-4 sm:grid-cols-[4.5rem_1fr]">
