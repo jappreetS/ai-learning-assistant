@@ -17,6 +17,20 @@ export const plans = pgTable("plans", {
   approved: boolean("approved").notNull().default(false),
 });
 
+export const applicationStage = pgEnum("application_stage", [
+  "saved",
+  "applied",
+  "interviewing",
+]);
+
+export const jobApplications = pgTable("job_applications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  roleTitle: text("role_title").notNull(),
+  company: text("company").notNull(),
+  stage: applicationStage("stage").notNull(),
+  planId: uuid("plan_id").references(() => plans.id, { onDelete: "set null" }),
+});
+
 export const planWeeks = pgTable("plan_weeks", {
   id: uuid("id").primaryKey().defaultRandom(),
   planId: uuid("plan_id")
