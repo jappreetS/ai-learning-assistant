@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
-import { targetRoles } from "@/db/schema";
+import { skillGaps, targetRoles } from "@/db/schema";
 import { askForSkillGaps } from "@/server/skill-gaps";
 
 export async function POST(_request: Request, context: { params: Promise<{ id: string }> }) {
@@ -12,8 +12,21 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
   }
 
   try {
-    const gaps = await askForSkillGaps(role);
-    return Response.json({ gaps });
+    const drafts = await askForSkillGaps(role);
+    const rows = await db.transaction(async (tx) => {
+      await tx.delete(skillGaps).where(eq(skillGaps.targetRoleId, id));
+      return tx
+        .insert(skillGaps)
+        .values(
+          drafts.map((gap, index) => ({
+            ...gap,
+            targetRoleId: id,
+            position: index + 1,
+          })),
+        )
+        .returning();
+    });
+    return Response.json(rows);
   } catch {
     return Response.json({ error: "The model did not return skill gaps" }, { status: 502 });
   }
