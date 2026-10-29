@@ -1,0 +1,1 @@
+ALTER TABLE "plans" ADD COLUMN "from_model" boolean DEFAULT false NOT NULL;

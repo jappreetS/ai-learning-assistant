@@ -21,7 +21,22 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
   }
 
   try {
-    const proposal = await askForPlan(gaps);
+    let proposal;
+    let fromModel = true;
+    try {
+      proposal = await askForPlan(gaps);
+    } catch {
+      fromModel = false;
+      proposal = {
+        lengthWeeks: gaps.length,
+        weeks: gaps.map((gap, index) => ({
+          label: `W${index + 1}`,
+          title: gap.name,
+          detail: gap.detail,
+        })),
+      };
+    }
+
     const saved = await db.transaction(async (tx) => {
       const [plan] = await tx
         .insert(plans)
@@ -32,6 +47,7 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
           currentWeek: 1,
           active: false,
           approved: false,
+          fromModel,
         })
         .returning();
       const weeks = await tx
