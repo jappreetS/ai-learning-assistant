@@ -9,7 +9,9 @@ type Week = { id: string; label: string; title: string; detail: string };
 
 export function ReviewPlan() {
   const router = useRouter();
-  const requestedId = useSearchParams().get("plan");
+  const searchParams = useSearchParams();
+  const requestedId = searchParams.get("plan");
+  const jobId = searchParams.get("job");
   const [planId, setPlanId] = useState<string | null>(null);
   const [fromModel, setFromModel] = useState(true);
   const [weeks, setWeeks] = useState<Week[]>([]);
@@ -52,6 +54,17 @@ export function ReviewPlan() {
     if (!activated.ok) {
       setMessage("Could not make the plan active.");
       return;
+    }
+    if (jobId) {
+      const linked = await fetch(`/api/v1/job-applications/${jobId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ planId }),
+      });
+      if (!linked.ok) {
+        setMessage("Could not attach the plan to the job.");
+        return;
+      }
     }
     router.push("/roadmap");
   }

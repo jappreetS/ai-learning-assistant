@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { TargetRoleForm } from "@/components/role/TargetRoleForm";
+import { Suspense } from "react";
 
 export const metadata: Metadata = { title: "Target role" };
 
@@ -10,7 +11,9 @@ export default function TargetRolePage() {
       <p className="mt-3 max-w-xl text-muted">
         Choose how you want to describe the role.
       </p>
-      <TargetRoleForm />
+      <Suspense>
+        <TargetRoleForm />
+      </Suspense>
     </main>
   );
 }

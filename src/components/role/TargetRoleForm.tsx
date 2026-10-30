@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Field } from "@/components/ui/Field";
 
@@ -14,6 +14,7 @@ const choices = [
 type Choice = (typeof choices)[number]["id"];
 
 export function TargetRoleForm() {
+  const jobId = useSearchParams().get("job");
   const [choice, setChoice] = useState<Choice>("resume-jd");
   const [roleTitle, setRoleTitle] = useState("Staff Frontend Engineer");
   const [company, setCompany] = useState(
@@ -96,7 +97,7 @@ export function TargetRoleForm() {
       setMessage("The model did not return skill gaps.");
       return;
     }
-    router.push("/gaps");
+    router.push(jobId ? `/gaps?job=${jobId}` : "/gaps");
   }
 
   return (

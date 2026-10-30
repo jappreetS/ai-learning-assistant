@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const groups = [
   { kind: "match", label: "Matches", pill: "Match", pillClass: "bg-good/15 text-good" },
@@ -13,6 +13,7 @@ const groups = [
 type Gap = { id: string; kind: "match" | "gap" | "proof"; name: string; detail: string; position: number };
 
 export function SkillGapsScreen() {
+  const jobId = useSearchParams().get("job");
   const [gaps, setGaps] = useState<Gap[] | null>(null);
   const router = useRouter();
   const [roleId, setRoleId] = useState<string | null>(null);
@@ -50,7 +51,8 @@ export function SkillGapsScreen() {
       return;
     }
     const body: { plan: { id: string } } = await response.json();
-    router.push(`/roadmap/review?plan=${body.plan.id}`);
+    const job = jobId ? `&job=${jobId}` : "";
+    router.push(`/roadmap/review?plan=${body.plan.id}${job}`);
   }
 
   const saved = gaps ?? [];

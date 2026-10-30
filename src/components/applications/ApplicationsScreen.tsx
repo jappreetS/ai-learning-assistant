@@ -108,7 +108,7 @@ export function ApplicationsScreen() {
                         Roadmap
                       </button>
                     ) : (
-                      <Link href="/role" className={linkClass}>
+                      <Link href={`/role?job=${row.id}`} className={linkClass}>
                         Target role
                       </Link>
                     )}
