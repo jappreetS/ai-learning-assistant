@@ -4,6 +4,16 @@ import { db } from "@/db/client";
 import { planWeeks, plans, skillGaps, targetRoles } from "@/db/schema";
 import { askForPlan } from "@/server/proposed-plan";
 
+function planTitle(role: { roleTitle: string | null; jobDescription: string | null }) {
+  const title = role.roleTitle?.trim();
+  if (title) return title;
+  const firstLine = role.jobDescription
+    ?.split("\n")
+    .map((line) => line.trim())
+    .find(Boolean);
+  return firstLine || "Target role";
+}
+
 export async function POST(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   const [role] = await db.select().from(targetRoles).where(eq(targetRoles.id, id));
@@ -41,7 +51,7 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
       const [plan] = await tx
         .insert(plans)
         .values({
-          roleTitle: role.roleTitle?.trim() || "Target role",
+          roleTitle: planTitle(role),
           company: role.company?.trim() || "Not specified",
           lengthWeeks: proposal.lengthWeeks,
           currentWeek: 1,
