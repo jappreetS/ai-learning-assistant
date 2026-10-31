@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { generate } from "@/server/ollama";
 
 const weekSchema = z.object({
   label: z.string().min(1),
@@ -28,22 +29,8 @@ ${lines.join("\n")}`;
 }
 
 export async function askForPlan(gaps: GapText[]): Promise<ProposedPlan> {
-  const response = await fetch("http://127.0.0.1:11434/api/generate", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      model: "llama3.2",
-      prompt: planPrompt(gaps),
-      stream: false,
-      format: "json",
-    }),
-  });
-  if (!response.ok) {
-    throw new Error("Ollama did not answer");
-  }
-
-  const body: { response?: string } = await response.json();
-  const parsed = replySchema.safeParse(JSON.parse(body.response ?? ""));
+  const text = await generate(planPrompt(gaps));
+  const parsed = replySchema.safeParse(JSON.parse(text));
   if (!parsed.success) {
     throw new Error("The model reply was not usable");
   }
