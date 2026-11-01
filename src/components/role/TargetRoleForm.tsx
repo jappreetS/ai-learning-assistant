@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Field } from "@/components/ui/Field";
@@ -16,60 +16,25 @@ type Choice = (typeof choices)[number]["id"];
 export function TargetRoleForm() {
   const jobId = useSearchParams().get("job");
   const [choice, setChoice] = useState<Choice>("resume-jd");
-  const [roleTitle, setRoleTitle] = useState("Staff Frontend Engineer");
-  const [company, setCompany] = useState(
-    "Northwind Labs — Staff Frontend Engineer (Remote)",
-  );
-  const [resume, setResume] = useState("Senior Frontend Engineer · 8 years");
-  const [jobDescription, setJobDescription] = useState(
-    "We're hiring a Staff Frontend Engineer.",
-  );
-  const [onlyJobDescription, setOnlyJobDescription] = useState(
-    "Senior Full-Stack Engineer — payments platform. Required: Node.js, PostgreSQL, React.",
-  );
-  const [writtenTitle, setWrittenTitle] = useState("Staff Frontend Engineer");
-  const [writtenSkills, setWrittenSkills] = useState(
-    "System design for frontend platforms\nDesign system governance\nWeb performance",
-  );
-  const [level, setLevel] = useState("Senior");
+  const [roleTitle, setRoleTitle] = useState("");
+  const [company, setCompany] = useState("");
+  const [resume, setResume] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [onlyJobDescription, setOnlyJobDescription] = useState("");
+  const [writtenTitle, setWrittenTitle] = useState("");
+  const [writtenSkills, setWrittenSkills] = useState("");
+  const [level, setLevel] = useState("");
 
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    let ignore = false;
-    async function load() {
-      const response = await fetch("/api/v1/target-roles");
-      const role: {
-        source: Choice;
-        roleTitle: string | null;
-        company: string | null;
-        resumeExcerpt: string | null;
-        jobDescription: string | null;
-        writtenSkills: string | null;
-        level: string | null;
-      } | null = await response.json();
-      if (!role || ignore) return;
-      setChoice(role.source);
-      if (role.source === "resume-jd") {
-        setRoleTitle(role.roleTitle ?? "");
-        setCompany(role.company ?? "");
-        setResume(role.resumeExcerpt ?? "");
-        setJobDescription(role.jobDescription ?? "");
-      } else if (role.source === "jd-only") {
-        setOnlyJobDescription(role.jobDescription ?? "");
-      } else {
-        setWrittenTitle(role.roleTitle ?? "");
-        setWrittenSkills(role.writtenSkills ?? "");
-        setLevel(role.level ?? "Senior");
-      }
-    }
-    void load();
-    return () => {
-      ignore = true;
-    };
-  }, []);
+  const canSave =
+    choice === "resume-jd"
+      ? Boolean(roleTitle.trim() && company.trim() && resume.trim() && jobDescription.trim())
+      : choice === "jd-only"
+        ? Boolean(onlyJobDescription.trim())
+        : Boolean(writtenTitle.trim() && writtenSkills.trim() && level);
 
   async function saveAndOpenGaps() {
     setSaving(true);
@@ -153,15 +118,21 @@ export function TargetRoleForm() {
               label="Current level"
               value={level}
               onChange={setLevel}
-              options={["Mid", "Senior", "Staff", "Principal"]}
+              options={[
+                { value: "", label: "Choose a level" },
+                "Mid",
+                "Senior",
+                "Staff",
+                "Principal",
+              ]}
             />
           </div>
         )}
         <button
           type="button"
           onClick={saveAndOpenGaps}
-          disabled={saving}
-          className="mt-6 inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep"
+          disabled={saving || !canSave}
+          className="mt-6 inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep disabled:cursor-not-allowed disabled:opacity-50"
         >
           Skill gaps
         </button>
