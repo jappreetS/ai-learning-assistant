@@ -90,13 +90,13 @@ export function SessionsScreen() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:py-10">
+    <main className="mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col px-5 py-6">
       <h1 className="text-3xl font-bold tracking-tight">Sessions</h1>
       <p className="mt-3 max-w-xl text-muted">
         A short record of what you studied, practiced, applied, or demonstrated.
       </p>
-      <div className="mt-8 grid items-start gap-6 lg:grid-cols-2">
-        <section className={panelClass}>
+      <div className="mt-6 grid min-h-0 flex-1 items-stretch gap-6 lg:grid-cols-2">
+        <section className={`${panelClass} min-h-0 overflow-y-auto`}>
           <h2 className="text-base font-semibold">New session</h2>
           <div className="mt-4 flex flex-col gap-4">
             <Field label="Date" type="date" value={date} onChange={setDate} />
@@ -133,9 +133,9 @@ export function SessionsScreen() {
             </div>
           </div>
         </section>
-        <section className={panelClass}>
+        <section className={`${panelClass} flex min-h-0 flex-col`}>
           <h2 className="text-base font-semibold">Recent sessions</h2>
-          <ol className="mt-4">
+          <ol className="mt-4 min-h-0 flex-1 overflow-y-auto">
             {sessions.map((session) => {
               const skill = skills.find((item) => item.id === session.skillId);
               return (
