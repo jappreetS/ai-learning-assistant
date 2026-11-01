@@ -46,18 +46,20 @@ export function RoadmapScreen() {
       <p className="mt-3 max-w-xl text-muted">
         {plan ? `${plan.roleTitle}, week ${plan.currentWeek} of ${plan.lengthWeeks}.` : "No plan is active."}
       </p>
-      <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4 rounded-xl border border-line bg-panel px-5 py-4 shadow-sm">
-        <div>
-          <p className="text-2xl font-bold tracking-tight">
-            {plan ? `${plan.currentWeek} of ${plan.lengthWeeks}` : "—"}
-          </p>
-          <p className="text-sm text-muted">Week</p>
+      {plan ? (
+        <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4 rounded-xl border border-line bg-panel px-5 py-4 shadow-sm">
+          <div>
+            <p className="text-2xl font-bold tracking-tight">
+              {plan.currentWeek} of {plan.lengthWeeks}
+            </p>
+            <p className="text-sm text-muted">Week</p>
+          </div>
+          <div>
+            <p className="text-base font-semibold">{current?.title ?? "—"}</p>
+            <p className="text-sm text-muted">This week</p>
+          </div>
         </div>
-        <div>
-          <p className="text-base font-semibold">{current?.title ?? "—"}</p>
-          <p className="text-sm text-muted">This week</p>
-        </div>
-      </div>
+      ) : null}
       <ol className="mt-8 flex flex-col gap-3">
         {weeks.map((week, index) => {
           const state = plan ? weekState(week.label, plan.currentWeek) : "Upcoming";
@@ -77,8 +79,8 @@ export function RoadmapScreen() {
               </div>
               <div
                 className={`ml-4 flex-1 rounded-xl border bg-panel p-4 ${state === "Current"
-                    ? "border-rail shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_16%,transparent)]"
-                    : "border-line"
+                  ? "border-rail shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_16%,transparent)]"
+                  : "border-line"
                   }`}
               >
                 <p

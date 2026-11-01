@@ -29,7 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${outfit.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-paper font-sans text-ink">
+      <body className="h-dvh overflow-hidden bg-paper font-sans text-ink">
         {children}
       </body>
     </html>
