@@ -45,6 +45,12 @@ npm run start
 
 The model runs on the machine where Ollama is installed. Skill gaps and a proposed plan need that model.
 
+## Hosted
+
+https://ai-learning-assistant-flame-beta.vercel.app/
+
+The hosted app uses its own database. The plan list there starts empty. Skill gaps and a proposed plan run only where Ollama is installed.
+
 ## Demo
 
 1. Open **Target role**. Choose a resume and job description, a job description only, or a role you write. Click **Skill gaps**.
