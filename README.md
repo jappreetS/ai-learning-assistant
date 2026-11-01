@@ -22,6 +22,41 @@ Engineers learn from books, videos, practice sites, and projects, but progress i
 
 ## Run locally
 
+Requires Node.js, Postgres, and [Ollama](https://ollama.com). Pull the model once:
+
 ```bash
+ollama pull llama3.2
+
 npm install
+cp .env.example .env
+npx drizzle-kit migrate
 npm run dev
+
+```
+
+`DATABASE_URL` is the Postgres database. `OLLAMA_URL` is the model. When `OLLAMA_URL` is missing, the app calls Ollama at `http://127.0.0.1:11434`.
+
+A production build:
+
+```bash
+npm run build
+npm run start
+```
+
+The model runs on the machine where Ollama is installed. Skill gaps and a proposed plan need that model.
+
+## Hosted
+
+https://ai-learning-assistant-flame-beta.vercel.app/
+
+The hosted app uses its own database. The plan list there starts empty. Skill gaps and a proposed plan run only where Ollama is installed.
+
+## Demo
+
+1. Open **Target role**. Choose a resume and job description, a job description only, or a role you write. Click **Skill gaps**.
+2. **Skill gaps** lists matches, gaps, and skills that still need proof. Click **Review plan**.
+3. **Review plan** lists the weeks. If the model does not answer, the weeks use the gap names, and the page says the model did not write the plan. Click **Approve**.
+4. **Roadmap** shows that plan. **Sessions** and **Progress** follow the active plan. **Plans** switches to another approved plan.
+5. **Job Applications** opens a job's plan. A job with no plan opens **Target role**. After **Approve**, that job opens **Roadmap**.
+
+The stages on Progress are Studied, Practiced, Applied, and Demonstrated.
