@@ -29,14 +29,13 @@ export function SessionsScreen() {
   const [planId, setPlanId] = useState<string | null>(null);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [date, setDate] = useState("2026-10-22");
-  const [duration, setDuration] = useState("45 min");
+  const [date, setDate] = useState("");
+  const [duration, setDuration] = useState("");
+  const [stage, setStage] = useState("");
+  const [note, setNote] = useState("");
   const [skillId, setSkillId] = useState("");
-  const [stage, setStage] = useState("Practiced");
-  const [note, setNote] = useState(
-    "Wrote the problem statement and two alternatives.",
-  );
   const [message, setMessage] = useState("");
+
 
   async function load(activePlanId: string) {
     const [skillResponse, sessionResponse] = await Promise.all([
@@ -46,9 +45,7 @@ export function SessionsScreen() {
     const skillRows: Skill[] = await skillResponse.json();
     setSkills(skillRows);
     setSessions(await sessionResponse.json());
-    setSkillId((current) =>
-      skillRows.some((skill) => skill.id === current) ? current : (skillRows[0]?.id ?? ""),
-    );
+    setSkillId("");
   }
 
   useEffect(() => {
@@ -107,7 +104,13 @@ export function SessionsScreen() {
               label="Duration"
               value={duration}
               onChange={setDuration}
-              options={["25 min", "45 min", "90 min", "2+ hours"]}
+              options={[
+                { value: "", label: "Choose a duration" },
+                "25 min",
+                "45 min",
+                "90 min",
+                "2+ hours",
+              ]}
             />
             <Field
               label="Skill"
@@ -115,10 +118,15 @@ export function SessionsScreen() {
               onChange={setSkillId}
               options={skills.map((skill) => ({ value: skill.id, label: skill.name }))}
             />
-            <Field label="Stage" value={stage} onChange={setStage} options={stages} />
+            <Field label="Stage" value={stage} onChange={setStage} options={[{ value: "", label: "Choose a stage" }, ...stages]} />
             <Field label="What happened" value={note} onChange={setNote} multiline />
             <div className="flex flex-wrap gap-2">
-              <Button onClick={saveSession}>Save session</Button>
+              <Button
+                onClick={saveSession}
+                disabled={!planId || !date || !duration || !skillId || !stage || !note.trim()}
+              >
+                Save session
+              </Button>
               <Button href="/progress" variant="quiet">
                 Progress
               </Button>
