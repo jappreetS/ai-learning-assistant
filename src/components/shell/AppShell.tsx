@@ -99,10 +99,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const close = () => setOpen(false);
 
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
+    <div className="h-dvh overflow-hidden lg:grid lg:grid-cols-[240px_1fr]">
       <aside
         id="sidebar"
-        className={`fixed inset-x-0 top-14 bottom-0 z-30 flex w-full flex-col gap-4 bg-surface p-4 transition-transform lg:static lg:inset-y-0 lg:z-auto lg:w-auto lg:translate-x-0 lg:border-r lg:border-line lg:bg-surface/70 ${open ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-x-0 top-14 bottom-0 z-30 flex w-full flex-col gap-4 bg-surface p-4 transition-transform lg:static lg:h-dvh lg:overflow-hidden lg:inset-y-0 lg:z-auto lg:w-auto lg:translate-x-0 lg:border-r lg:border-line lg:bg-surface/70 ${open ? "translate-x-0" : "-translate-x-full"
           }`}
       >
         <Brand onNavigate={close} />
@@ -115,8 +115,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex min-h-screen min-w-0 flex-col">
-        <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-3 border-b border-line bg-paper/90 px-5 backdrop-blur">
+      <div className="flex h-dvh min-w-0 flex-col overflow-hidden">
+        <header className="shrink-0 z-10 flex h-14 items-center justify-between gap-3 border-b border-line bg-paper/90 px-5 backdrop-blur">
           <button
             type="button"
             className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-ink lg:hidden"
@@ -146,7 +146,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {isApplications ? "Open learning" : "Target role"}
           </Link>
         </header>
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
       </div>
     </div>
   );
