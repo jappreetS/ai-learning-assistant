@@ -30,17 +30,29 @@ export function Field({
     <label className="block text-sm font-semibold">
       {label}
       {options ? (
-        <select
-          className={className}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-        >
-          {options.map((option) => (
-            <option key={choiceValue(option)} value={choiceValue(option)}>
-              {choiceLabel(option)}
-            </option>
-          ))}
-        </select>
+        <span className="relative mt-1.5 block">
+          <select
+            className="w-full appearance-none rounded-lg border border-line bg-surface py-2.5 pr-10 pl-3.5 text-sm outline-none focus:border-rail focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_12%,transparent)]"
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+          >
+            {options.map((option) => (
+              <option key={choiceValue(option)} value={choiceValue(option)}>
+                {choiceLabel(option)}
+              </option>
+            ))}
+          </select>
+          <svg
+            viewBox="0 0 20 20"
+            className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            aria-hidden="true"
+          >
+            <path d="M6 8l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
       ) : multiline ? (
         <textarea
           className={`${className} min-h-32`}
