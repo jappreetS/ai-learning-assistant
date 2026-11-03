@@ -1,15 +1,16 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { Button } from "@/components/ui/Button";
+import { Shimmer } from "@/components/ui/Shimmer";
 
 async function readPlans(): Promise<Plan[]> {
   const response = await fetch("/api/v1/plans");
   if (!response.ok) throw new Error("Could not load plans");
   return response.json();
 }
-
 
 type Plan = {
   id: string;
@@ -47,8 +48,13 @@ export function PlansScreen() {
         Each plan keeps its own gaps, sessions, and progress.
       </p>
       {plans.isPending ? (
-        <div className="mt-8">
-          <p className="text-sm text-muted">Loading plans...</p>
+        <div className="mt-8 grid gap-4 md:grid-cols-2" aria-busy="true" aria-label="Loading plans">
+          {Array.from({ length: 4 }, (_, index) => (
+            <div key={index} className="rounded-xl border border-line bg-surface p-5 shadow-sm">
+              <Shimmer className="h-4 w-2/3" />
+              <Shimmer className="mt-3 h-3 w-1/2" />
+            </div>
+          ))}
         </div>
       ) : plans.isError ? null : (
         <div className="mt-8 grid gap-4 md:grid-cols-2">

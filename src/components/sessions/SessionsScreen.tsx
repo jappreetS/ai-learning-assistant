@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
+import { Shimmer } from "@/components/ui/Shimmer";
 import { readJson } from "@/lib/api";
 
 type Skill = { id: string; name: string };
@@ -85,7 +86,24 @@ export function SessionsScreen() {
         A short record of what you studied, practiced, applied, or demonstrated.
       </p>
       {loading ? (
-        <p className="mt-6 text-sm text-muted">Loading sessions...</p>
+        <div className="mt-6 grid min-h-0 flex-1 items-stretch gap-6 lg:grid-cols-2" aria-busy="true" aria-label="Loading sessions">
+          <section className={panelClass}>
+            <h2 className="text-base font-semibold">New session</h2>
+            <div className="mt-4 flex flex-col gap-4">
+              <Shimmer className="h-10 w-full" />
+              <Shimmer className="h-10 w-full" />
+              <Shimmer className="h-10 w-full" />
+            </div>
+          </section>
+          <section className={`${panelClass} flex min-h-0 flex-col`}>
+            <h2 className="text-base font-semibold">Recent sessions</h2>
+            <div className="mt-4 flex flex-col gap-4">
+              <Shimmer className="h-10 w-full" />
+              <Shimmer className="h-10 w-full" />
+              <Shimmer className="h-10 w-full" />
+            </div>
+          </section>
+        </div>
       ) : failed ? (
         <p className="mt-6 text-sm text-muted">Could not load sessions</p>
       ) : (

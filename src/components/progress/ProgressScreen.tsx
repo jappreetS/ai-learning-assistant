@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/Button";
+import { Shimmer } from "@/components/ui/Shimmer";
 import { readJson } from "@/lib/api";
 
 const stages = ["studied", "practiced", "applied", "demonstrated"] as const;
@@ -66,7 +67,11 @@ export function ProgressScreen() {
         ))}
       </ol>
       {loading ? (
-        <p className="mt-8 text-sm text-muted">Loading progress...</p>
+        <div className="mt-8 rounded-xl border border-line bg-surface p-4 shadow-sm" aria-busy="true" aria-label="Loading progress">
+          {Array.from({ length: 4 }, (_, index) => (
+            <Shimmer key={index} className="mt-3 h-4 w-full first:mt-0" />
+          ))}
+        </div>
       ) : failed ? (
         <p className="mt-8 text-sm text-muted">Could not load progress</p>
       ) : !active ? (

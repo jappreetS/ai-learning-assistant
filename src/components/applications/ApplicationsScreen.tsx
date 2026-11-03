@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { Shimmer } from "@/components/ui/Shimmer";
 import { readJson } from "@/lib/api";
 
 type Plan = {
@@ -68,7 +69,11 @@ export function ApplicationsScreen() {
       <h1 className="text-3xl font-bold tracking-tight">Job Applications</h1>
       <p className="mt-3 max-w-xl text-muted">Saved applications. Each row can point at a plan.</p>
       {loading ? (
-        <p className="mt-8 text-sm text-muted">Loading applications...</p>
+        <div className="mt-8 rounded-xl border border-line bg-surface p-4 shadow-sm" aria-busy="true" aria-label="Loading applications">
+          {Array.from({ length: 4 }, (_, index) => (
+            <Shimmer key={index} className="mt-3 h-4 w-full first:mt-0" />
+          ))}
+        </div>
       ) : failed ? (
         <p className="mt-8 text-sm text-muted">Could not load applications</p>
       ) : (

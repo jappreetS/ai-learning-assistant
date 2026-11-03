@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { Shimmer } from "@/components/ui/Shimmer";
 import { readJson } from "@/lib/api";
 
 const groups = [
@@ -57,7 +58,15 @@ export function SkillGapsScreen() {
         Matches, gaps, and skills that still need proof for that role.
       </p>
       {loading ? (
-        <p className="mt-8 text-sm text-muted">Loading skill gaps...</p>
+        <div className="mt-8 grid gap-4 lg:grid-cols-3" aria-busy="true" aria-label="Loading skill gaps">
+          {Array.from({ length: 3 }, (_, index) => (
+            <div key={index}>
+              <Shimmer className="h-8 w-12" />
+              <Shimmer className="mt-4 h-16 w-full" />
+              <Shimmer className="mt-2 h-16 w-full" />
+            </div>
+          ))}
+        </div>
       ) : failed ? (
         <p className="mt-8 text-sm text-muted">Could not load skill gaps</p>
       ) : (

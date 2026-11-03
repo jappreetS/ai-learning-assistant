@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { Shimmer } from "@/components/ui/Shimmer";
 import { readJson } from "@/lib/api";
 
 type Plan = { id: string; fromModel: boolean };
@@ -72,7 +73,15 @@ export function ReviewPlan() {
         <p className="mt-3 text-sm text-muted">The model did not write this plan.</p>
       ) : null}
       {loading ? (
-        <p className="mt-8 text-sm text-muted">Loading plan...</p>
+        <div className="mt-8 flex flex-col gap-3" aria-busy="true" aria-label="Loading plan">
+          {Array.from({ length: 3 }, (_, index) => (
+            <div key={index} className="rounded-xl border border-line bg-panel p-4">
+              <Shimmer className="h-3 w-16" />
+              <Shimmer className="mt-3 h-4 w-1/2" />
+              <Shimmer className="mt-2 h-3 w-full" />
+            </div>
+          ))}
+        </div>
       ) : failed ? (
         <p className="mt-8 text-sm text-muted">Could not load plan</p>
       ) : !plan.data ? (

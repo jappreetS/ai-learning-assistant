@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
+import { Shimmer } from "@/components/ui/Shimmer";
 import { readJson } from "@/lib/api";
 
 type Plan = { id: string; active: boolean; roleTitle: string; lengthWeeks: number; currentWeek: number };
@@ -47,6 +48,17 @@ export function RoadmapScreen() {
               ? `${plan.roleTitle}, week ${plan.currentWeek} of ${plan.lengthWeeks}.`
               : "No plan is active."}
       </p>
+      {loading ? (
+        <div className="mt-8 flex flex-col gap-3" aria-busy="true" aria-label="Loading roadmap">
+          {Array.from({ length: 3 }, (_, index) => (
+            <div key={index} className="rounded-xl border border-line bg-panel p-4">
+              <Shimmer className="h-3 w-16" />
+              <Shimmer className="mt-3 h-4 w-2/3" />
+              <Shimmer className="mt-2 h-3 w-full" />
+            </div>
+          ))}
+        </div>
+      ) : null}
       {showWeeks && plan ? (
         <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4 rounded-xl border border-line bg-panel px-5 py-4 shadow-sm">
           <div>
