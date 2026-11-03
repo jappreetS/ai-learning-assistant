@@ -1,8 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+
+async function readPlans(): Promise<Plan[]> {
+  const response = await fetch("/api/v1/plans");
+  if (!response.ok) throw new Error("Could not load plans");
+  return response.json();
+}
+
 
 type Plan = {
   id: string;
@@ -15,17 +22,9 @@ type Plan = {
 };
 
 export function PlansScreen() {
-  const [plans, setPlans] = useState<Plan[]>([]);
+  const queryClient = useQueryClient();
+  const plans = useQuery({ queryKey: ["plans"], queryFn: readPlans });
   const [message, setMessage] = useState("");
-
-  async function load() {
-    const response = await fetch("/api/v1/plans");
-    setPlans(await response.json());
-  }
-
-  useEffect(() => {
-    void load();
-  }, []);
 
   async function activate(plan: Plan) {
     const response = await fetch(`/api/v1/plans/${plan.id}/activate`, { method: "POST" });
@@ -35,10 +34,11 @@ export function PlansScreen() {
       return;
     }
     setMessage("");
-    await load();
+    await queryClient.invalidateQueries({ queryKey: ["plans"] });
   }
 
-  const active = plans.find((plan) => plan.active);
+  const rows = plans.data ?? [];
+  const active = rows.find((plan) => plan.active);
 
   return (
     <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:py-10">
@@ -46,33 +46,47 @@ export function PlansScreen() {
       <p className="mt-3 max-w-xl text-muted">
         Each plan keeps its own gaps, sessions, and progress.
       </p>
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
-        {plans.map((plan) => (
-          <button
-            key={plan.id}
-            type="button"
-            onClick={() => activate(plan)}
-            className={`rounded-xl border bg-surface p-5 text-left shadow-sm ${plan.active
+      {plans.isPending ? (
+        <div className="mt-8">
+          <p className="text-sm text-muted">Loading plans...</p>
+        </div>
+      ) : plans.isError ? null : (
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          {rows.map((plan) => (
+            <button
+              key={plan.id}
+              type="button"
+              onClick={() => activate(plan)}
+              className={`rounded-xl border bg-surface p-5 text-left shadow-sm ${plan.active
                 ? "border-rail shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_16%,transparent)]"
                 : "border-line"
-              }`}
-          >
-            {plan.active ? (
-              <p className="mb-3 w-fit rounded-full bg-rail/10 px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide text-raildeep">
-                Active now
+                }`}
+            >
+              {plan.active ? (
+                <p className="mb-3 w-fit rounded-full bg-rail/10 px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide text-raildeep">
+                  Active now
+                </p>
+              ) : null}
+              <h2 className="text-lg font-bold tracking-tight">{plan.roleTitle}</h2>
+              <p className="mt-1 text-sm text-muted">
+                {plan.company} · {plan.lengthWeeks}-week plan · Week {plan.currentWeek}
               </p>
-            ) : null}
-            <h2 className="text-lg font-bold tracking-tight">{plan.roleTitle}</h2>
-            <p className="mt-1 text-sm text-muted">
-              {plan.company} · {plan.lengthWeeks}-week plan · Week {plan.currentWeek}
-            </p>
-            <p className="mt-3 text-sm text-muted">{plan.approved ? "Approved" : "Not approved"}</p>
-          </button>
-        ))}
-      </div>
-      <p className="mt-6 text-sm text-muted">
-        {message || (active ? `${active.roleTitle} is active.` : "No plan is active.")}
-      </p>
+              <p className="mt-3 text-sm text-muted">{plan.approved ? "Approved" : "Not approved"}</p>
+            </button>
+          ))}
+        </div>
+      )}
+      {plans.isPending ? null : (
+        <p className="mt-6 text-sm text-muted">
+          {message
+            ? message
+            : plans.isError
+              ? "Could not load plans"
+              : active
+                ? `${active.roleTitle} is active.`
+                : "No plan is active."}
+        </p>
+      )}
       <div className="mt-4 flex flex-wrap gap-2">
         <Button href="/roadmap">Roadmap</Button>
         <Button href="/role" variant="quiet">
