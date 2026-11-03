@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+
+import { readJson } from "@/lib/api";
 
 const groups = [
   { kind: "match", label: "Matches", pill: "Match", pillClass: "bg-good/15 text-good" },
@@ -14,31 +17,21 @@ type Gap = { id: string; kind: "match" | "gap" | "proof"; name: string; detail: 
 
 export function SkillGapsScreen() {
   const jobId = useSearchParams().get("job");
-  const [gaps, setGaps] = useState<Gap[] | null>(null);
   const router = useRouter();
-  const [roleId, setRoleId] = useState<string | null>(null);
+  const role = useQuery({
+    queryKey: ["target-role"],
+    queryFn: () => readJson<{ id: string } | null>("/api/v1/target-roles"),
+  });
+  const gaps = useQuery({
+    queryKey: ["target-role", role.data?.id, "gaps"],
+    enabled: Boolean(role.data),
+    queryFn: () => readJson<Gap[]>(`/api/v1/target-roles/${role.data!.id}/gaps`),
+  });
+  const loading = role.isPending || (Boolean(role.data) && gaps.isPending);
+  const failed = role.isError || gaps.isError;
+  const roleId = role.data?.id ?? null;
   const [proposing, setProposing] = useState(false);
   const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    let ignore = false;
-    async function load() {
-      const roleResponse = await fetch("/api/v1/target-roles");
-      const role: { id: string } | null = await roleResponse.json();
-      setRoleId(role?.id ?? null);
-      if (!role || ignore) {
-        if (!ignore) setGaps([]);
-        return;
-      }
-      const gapResponse = await fetch(`/api/v1/target-roles/${role.id}/gaps`);
-      const rows: Gap[] = await gapResponse.json();
-      if (!ignore) setGaps(rows);
-    }
-    void load();
-    return () => {
-      ignore = true;
-    };
-  }, []);
 
   async function propose() {
     if (!roleId) return;
@@ -55,7 +48,7 @@ export function SkillGapsScreen() {
     router.push(`/roadmap/review?plan=${body.plan.id}${job}`);
   }
 
-  const saved = gaps ?? [];
+  const saved = gaps.data ?? [];
 
   return (
     <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:py-10">
@@ -63,38 +56,47 @@ export function SkillGapsScreen() {
       <p className="mt-3 max-w-xl text-muted">
         Matches, gaps, and skills that still need proof for that role.
       </p>
-      <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4 rounded-xl border border-line bg-panel px-5 py-4 shadow-sm">
-        {groups.map((group) => (
-          <div key={group.kind}>
-            <p className="text-2xl font-bold tracking-tight">
-              {saved.filter((gap) => gap.kind === group.kind).length}
-            </p>
-            <p className="text-sm text-muted">{group.label}</p>
+      {loading ? (
+        <p className="mt-8 text-sm text-muted">Loading skill gaps...</p>
+      ) : failed ? (
+        <p className="mt-8 text-sm text-muted">Could not load skill gaps</p>
+      ) : (
+        <>
+          <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4 rounded-xl border border-line bg-panel px-5 py-4 shadow-sm">
+            {groups.map((group) => (
+              <div key={group.kind}>
+                <p className="text-2xl font-bold tracking-tight">
+                  {saved.filter((gap) => gap.kind === group.kind).length}
+                </p>
+                <p className="text-sm text-muted">{group.label}</p>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        {groups.map((group) => (
-          <section key={group.kind}>
-            <h2 className="mb-3 flex items-center gap-2 text-base font-semibold">
-              <span className={`rounded-full px-2 py-0.5 font-mono text-[11px] font-medium uppercase ${group.pillClass}`}>
-                {group.pill}
-              </span>
-              {group.label}
-            </h2>
-            <ul className="flex flex-col gap-2">
-              {saved
-                .filter((gap) => gap.kind === group.kind)
-                .map((gap) => (
-                  <li key={gap.id} className="rounded-lg border border-line bg-panel px-3.5 py-3">
-                    <p className="text-sm font-semibold">{gap.name}</p>
-                    <p className="mt-1 text-sm text-muted">{gap.detail}</p>
-                  </li>
-                ))}
-            </ul>
-          </section>
-        ))}
-      </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {groups.map((group) => (
+              <section key={group.kind}>
+                <h2 className="mb-3 flex items-center gap-2 text-base font-semibold">
+                  <span className={`rounded-full px-2 py-0.5 font-mono text-[11px] font-medium uppercase ${group.pillClass}`}>
+                    {group.pill}
+                  </span>
+                  {group.label}
+                </h2>
+                <ul className="flex flex-col gap-2">
+                  {saved
+                    .filter((gap) => gap.kind === group.kind)
+                    .map((gap) => (
+                      <li key={gap.id} className="rounded-lg border border-line bg-panel px-3.5 py-3">
+                        <p className="text-sm font-semibold">{gap.name}</p>
+                        <p className="mt-1 text-sm text-muted">{gap.detail}</p>
+                      </li>
+                    ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </>
+      )}
+      {message ? <p className="mt-6 text-sm text-muted">{message}</p> : null}
       <div className="mt-6 flex flex-wrap gap-3">
         <button
           type="button"

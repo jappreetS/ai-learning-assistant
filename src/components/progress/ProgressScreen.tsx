@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/Button";
+import { readJson } from "@/lib/api";
 
 const stages = ["studied", "practiced", "applied", "demonstrated"] as const;
 
@@ -33,28 +34,20 @@ function StageBar({ stage }: { stage: Skill["stage"] }) {
 }
 
 export function ProgressScreen() {
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    let ignore = false;
-    async function load() {
-      const planResponse = await fetch("/api/v1/plans");
-      const plans: { id: string; active: boolean }[] = await planResponse.json();
-      const active = plans.find((plan) => plan.active);
-      if (!active || ignore) {
-        if (!ignore) setMessage("No plan is active.");
-        return;
-      }
-      const skillResponse = await fetch(`/api/v1/plans/${active.id}/skills`);
-      const rows: Skill[] = await skillResponse.json();
-      if (!ignore) setSkills(rows);
-    }
-    void load();
-    return () => {
-      ignore = true;
-    };
-  }, []);
+  const plans = useQuery({
+    queryKey: ["plans"],
+    queryFn: () => readJson<{ id: string; active: boolean }[]>("/api/v1/plans"),
+  });
+  const active = plans.data?.find((plan) => plan.active);
+  const skills = useQuery({
+    queryKey: ["plans", active?.id, "skills"],
+    queryFn: () => readJson<Skill[]>(`/api/v1/plans/${active!.id}/skills`),
+    enabled: Boolean(active),
+  });
+  const loading = plans.isPending || (Boolean(active) && skills.isPending);
+  const failed = plans.isError || skills.isError;
+  const rows = skills.data ?? [];
 
   return (
     <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:py-10">
@@ -72,32 +65,39 @@ export function ProgressScreen() {
           </li>
         ))}
       </ol>
-      <div className="mt-8 overflow-x-auto rounded-xl border border-line bg-surface shadow-sm">
-        <table className="w-full min-w-[40rem] border-collapse text-left">
-          <thead>
-            <tr className="text-xs uppercase tracking-wide text-muted">
-              <th className="px-4 py-3 font-medium">Skill</th>
-              <th className="px-4 py-3 font-medium">Stage</th>
-              <th className="px-4 py-3 font-medium">Latest note</th>
-              <th className="px-4 py-3 font-medium">Next step</th>
-            </tr>
-          </thead>
-          <tbody>
-            {skills.map((skill) => (
-              <tr key={skill.id} className="border-t border-line align-top">
-                <td className="px-4 py-3">
-                  <p className="font-semibold">{skill.name}</p>
-                  <StageBar stage={skill.stage} />
-                </td>
-                <td className="px-4 py-3 text-sm">{skill.stage ? label(skill.stage) : "—"}</td>
-                <td className="px-4 py-3 text-sm text-muted">{skill.latestNote || "—"}</td>
-                <td className="px-4 py-3 text-sm text-muted">{skill.nextStep || "—"}</td>
+      {loading ? (
+        <p className="mt-8 text-sm text-muted">Loading progress...</p>
+      ) : failed ? (
+        <p className="mt-8 text-sm text-muted">Could not load progress</p>
+      ) : !active ? (
+        <p className="mt-8 text-sm text-muted">No plan is active.</p>
+      ) : (
+        <div className="mt-8 overflow-x-auto rounded-xl border border-line bg-surface shadow-sm">
+          <table className="w-full min-w-[40rem] border-collapse text-left">
+            <thead>
+              <tr className="text-xs uppercase tracking-wide text-muted">
+                <th className="px-4 py-3 font-medium">Skill</th>
+                <th className="px-4 py-3 font-medium">Stage</th>
+                <th className="px-4 py-3 font-medium">Latest note</th>
+                <th className="px-4 py-3 font-medium">Next step</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {message ? <p className="mt-6 text-sm text-muted">{message}</p> : null}
+            </thead>
+            <tbody>
+              {rows.map((skill) => (
+                <tr key={skill.id} className="border-t border-line align-top">
+                  <td className="px-4 py-3">
+                    <p className="font-semibold">{skill.name}</p>
+                    <StageBar stage={skill.stage} />
+                  </td>
+                  <td className="px-4 py-3 text-sm">{skill.stage ? label(skill.stage) : "—"}</td>
+                  <td className="px-4 py-3 text-sm text-muted">{skill.latestNote || "—"}</td>
+                  <td className="px-4 py-3 text-sm text-muted">{skill.nextStep || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       <div className="mt-6 flex flex-wrap gap-2">
         <Button href="/sessions">Sessions</Button>
         <Button href="/roadmap" variant="quiet">
