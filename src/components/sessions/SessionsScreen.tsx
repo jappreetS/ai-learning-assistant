@@ -128,7 +128,10 @@ export function SessionsScreen() {
                 label="Skill"
                 value={skillId}
                 onChange={setSkillId}
-                options={skillRows.map((skill) => ({ value: skill.id, label: skill.name }))}
+                options={[
+                  { value: "", label: "Choose a skill" },
+                  ...skillRows.map((skill) => ({ value: skill.id, label: skill.name })),
+                ]}
               />
               <Field label="Stage" value={stage} onChange={setStage} options={[{ value: "", label: "Choose a stage" }, ...stages]} />
               <Field label="What happened" value={note} onChange={setNote} multiline />
