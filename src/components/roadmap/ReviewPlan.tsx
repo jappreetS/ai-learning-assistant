@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+
+import { Shimmer } from "@/components/ui/Shimmer";
+import { readJson } from "@/lib/api";
 
 type Plan = { id: string; fromModel: boolean };
 type Week = { id: string; label: string; title: string; detail: string };
@@ -12,45 +16,33 @@ export function ReviewPlan() {
   const searchParams = useSearchParams();
   const requestedId = searchParams.get("plan");
   const jobId = searchParams.get("job");
-  const [planId, setPlanId] = useState<string | null>(null);
-  const [fromModel, setFromModel] = useState(true);
-  const [weeks, setWeeks] = useState<Week[]>([]);
+  const queryClient = useQueryClient();
   const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    let ignore = false;
-    async function load() {
-      if (!requestedId) {
-        if (!ignore) setMessage("No proposed plan.");
-        return;
-      }
-      const planResponse = await fetch("/api/v1/plans");
-      const plans: Plan[] = await planResponse.json();
-      const plan = plans.find((item) => item.id === requestedId);
-      if (!plan || ignore) {
-        if (!ignore) setMessage("No proposed plan.");
-        return;
-      }
-      setPlanId(plan.id);
-      setFromModel(plan.fromModel);
-      const weekResponse = await fetch(`/api/v1/plans/${plan.id}/weeks`);
-      const rows: Week[] = await weekResponse.json();
-      if (!ignore) setWeeks(rows);
-    }
-    void load();
-    return () => {
-      ignore = true;
-    };
-  }, [requestedId]);
+  const plan = useQuery({
+    queryKey: ["plans", requestedId],
+    enabled: Boolean(requestedId),
+    queryFn: async () => {
+      const plans = await readJson<Plan[]>("/api/v1/plans");
+      return plans.find((item) => item.id === requestedId) ?? null;
+    },
+  });
+  const weeks = useQuery({
+    queryKey: ["plans", requestedId, "weeks"],
+    enabled: Boolean(plan.data),
+    queryFn: () => readJson<Week[]>(`/api/v1/plans/${requestedId}/weeks`),
+  });
+  const loading = Boolean(requestedId) && (plan.isPending || (Boolean(plan.data) && weeks.isPending));
+  const failed = plan.isError || weeks.isError;
+  const rows = weeks.data ?? [];
 
   async function approve() {
-    if (!planId) return;
-    const approved = await fetch(`/api/v1/plans/${planId}/approve`, { method: "POST" });
+    if (!plan.data) return;
+    const approved = await fetch(`/api/v1/plans/${plan.data.id}/approve`, { method: "POST" });
     if (!approved.ok) {
       setMessage("Could not approve the plan.");
       return;
     }
-    const activated = await fetch(`/api/v1/plans/${planId}/activate`, { method: "POST" });
+    const activated = await fetch(`/api/v1/plans/${plan.data.id}/activate`, { method: "POST" });
     if (!activated.ok) {
       setMessage("Could not make the plan active.");
       return;
@@ -59,13 +51,15 @@ export function ReviewPlan() {
       const linked = await fetch(`/api/v1/job-applications/${jobId}`, {
         method: "PATCH",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ planId }),
+        body: JSON.stringify({ planId: plan.data.id }),
       });
       if (!linked.ok) {
         setMessage("Could not attach the plan to the job.");
         return;
       }
+      await queryClient.invalidateQueries({ queryKey: ["job-applications"] });
     }
+    await queryClient.invalidateQueries({ queryKey: ["plans"] });
     router.push("/roadmap");
   }
 
@@ -75,11 +69,26 @@ export function ReviewPlan() {
       <p className="mt-3 max-w-xl text-muted">
         These weeks were proposed from the skill gaps. Approve to make this the roadmap.
       </p>
-      {planId && !fromModel ? (
+      {plan.data && !plan.data.fromModel ? (
         <p className="mt-3 text-sm text-muted">The model did not write this plan.</p>
       ) : null}
+      {loading ? (
+        <div className="mt-8 flex flex-col gap-3" aria-busy="true" aria-label="Loading plan">
+          {Array.from({ length: 3 }, (_, index) => (
+            <div key={index} className="rounded-xl border border-line bg-panel p-4">
+              <Shimmer className="h-3 w-16" />
+              <Shimmer className="mt-3 h-4 w-1/2" />
+              <Shimmer className="mt-2 h-3 w-full" />
+            </div>
+          ))}
+        </div>
+      ) : failed ? (
+        <p className="mt-8 text-sm text-muted">Could not load plan</p>
+      ) : !plan.data ? (
+        <p className="mt-8 text-sm text-muted">No proposed plan.</p>
+      ) : (
       <ol className="mt-8 flex flex-col gap-3">
-        {weeks.map((week) => (
+        {rows.map((week) => (
           <li key={week.id} className="grid gap-3 rounded-xl border border-line bg-panel p-4 sm:grid-cols-[4.5rem_1fr]">
             <p className="font-mono text-xs text-rail">{week.label}</p>
             <div>
@@ -89,12 +98,13 @@ export function ReviewPlan() {
           </li>
         ))}
       </ol>
+      )}
       {message ? <p className="mt-6 text-sm text-muted">{message}</p> : null}
       <div className="mt-6 flex flex-wrap gap-3">
         <button
           type="button"
           onClick={approve}
-          disabled={!planId}
+          disabled={!plan.data}
           className="inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep disabled:cursor-not-allowed disabled:opacity-50"
         >
           Approve
