@@ -105,7 +105,7 @@ export function ReviewPlan() {
           type="button"
           onClick={approve}
           disabled={!plan.data}
-          className="inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep disabled:opacity-50"
         >
           Approve
         </button>
