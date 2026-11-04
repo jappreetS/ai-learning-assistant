@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -64,6 +64,7 @@ export function SkillGapsScreen() {
   const loading = role.isPending || (Boolean(role.data) && (gaps.isPending || keywords.isPending));
   const failed = role.isError || gaps.isError || keywords.isError;
   const roleId = role.data?.id ?? null;
+  const queryClient = useQueryClient();
   const [proposing, setProposing] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -84,6 +85,31 @@ export function SkillGapsScreen() {
 
   const saved = gaps.data ?? [];
   const keywordRows = keywords.data?.keywords ?? [];
+
+  function alreadySaved(name: string) {
+    return saved.some((gap) => gap.kind === "gap" && gap.name.toLowerCase() === name.toLowerCase());
+  }
+
+  async function saveKeyword(name: string) {
+    if (!roleId || alreadySaved(name)) return;
+    const position = saved.reduce((max, gap) => Math.max(max, gap.position), 0) + 1;
+    const response = await fetch(`/api/v1/target-roles/${roleId}/gaps`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        kind: "gap",
+        name,
+        detail: `Add a bullet that shows ${name}.`,
+        position,
+      }),
+    });
+    if (!response.ok) {
+      setMessage("Could not save that gap.");
+      return;
+    }
+    setMessage("");
+    await queryClient.invalidateQueries({ queryKey: ["target-role", roleId, "gaps"] });
+  }
   const showComparison =
     role.data?.source === "resume-jd" && Boolean(role.data.resumeExcerpt) && Boolean(role.data.jobDescription);
 
@@ -131,12 +157,23 @@ export function SkillGapsScreen() {
                 <ul className="mt-4 flex flex-col gap-3">
                   {keywordRows
                     .filter((item) => !item.present)
-                    .map((item) => (
-                      <li key={item.name}>
-                        <p className="text-sm font-semibold text-bad">{item.name}</p>
-                        <p className="mt-1 text-sm text-muted">Add a bullet that shows {item.name}.</p>
-                      </li>
-                    ))}
+                    .map((item) => {
+                      const savedAlready = alreadySaved(item.name);
+                      return (
+                        <li key={item.name}>
+                          <p className="text-sm font-semibold text-bad">{item.name}</p>
+                          <p className="mt-1 text-sm text-muted">Add a bullet that shows {item.name}.</p>
+                          <button
+                            type="button"
+                            onClick={() => saveKeyword(item.name)}
+                            disabled={savedAlready}
+                            className="mt-2 inline-flex rounded-full bg-surface px-3 py-1 text-sm font-semibold shadow-[inset_0_0_0_1px_var(--line)] disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {savedAlready ? "Saved as a gap" : "Save as a gap"}
+                          </button>
+                        </li>
+                      );
+                    })}
                 </ul>
               </section>
             </div>
