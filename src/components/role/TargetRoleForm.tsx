@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { targetRoleSchema } from "@/lib/schemas";
 import { Field } from "@/components/ui/Field";
 
 const choices = [
@@ -29,26 +30,23 @@ export function TargetRoleForm() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  const canSave =
+  const body =
     choice === "resume-jd"
-      ? Boolean(roleTitle.trim() && company.trim() && resume.trim() && jobDescription.trim())
+      ? { source: choice, roleTitle, company, resumeExcerpt: resume, jobDescription }
       : choice === "jd-only"
-        ? Boolean(onlyJobDescription.trim())
-        : Boolean(writtenTitle.trim() && writtenSkills.trim() && level);
+        ? { source: choice, jobDescription: onlyJobDescription }
+        : { source: choice, roleTitle: writtenTitle, writtenSkills, level };
+  const parsed = targetRoleSchema.safeParse(body);
+  const canSave = parsed.success;
 
   async function saveAndOpenGaps() {
+    if (!parsed.success) return;
     setSaving(true);
     setMessage("");
-    const body =
-      choice === "resume-jd"
-        ? { source: choice, roleTitle, company, resumeExcerpt: resume, jobDescription }
-        : choice === "jd-only"
-          ? { source: choice, jobDescription: onlyJobDescription }
-          : { source: choice, roleTitle: writtenTitle, writtenSkills, level };
     const response = await fetch("/api/v1/target-roles", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(parsed.data),
     });
     if (!response.ok) {
       setSaving(false);
