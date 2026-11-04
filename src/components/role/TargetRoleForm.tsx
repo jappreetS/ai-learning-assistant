@@ -134,7 +134,7 @@ export function TargetRoleForm() {
           type="button"
           onClick={saveAndOpenGaps}
           disabled={saving || !canSave}
-          className="mt-6 inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-6 inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep disabled:opacity-50"
         >
           Skill gaps
         </button>

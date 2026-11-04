@@ -167,7 +167,7 @@ export function SkillGapsScreen() {
                             type="button"
                             onClick={() => saveKeyword(item.name)}
                             disabled={savedAlready}
-                            className="mt-2 inline-flex rounded-full bg-surface px-3 py-1 text-sm font-semibold shadow-[inset_0_0_0_1px_var(--line)] disabled:cursor-not-allowed disabled:opacity-50"
+                            className="mt-2 inline-flex rounded-full bg-surface px-3 py-1 text-sm font-semibold shadow-[inset_0_0_0_1px_var(--line)] disabled:opacity-50"
                           >
                             {savedAlready ? "Saved as a gap" : "Save as a gap"}
                           </button>
@@ -218,7 +218,7 @@ export function SkillGapsScreen() {
           type="button"
           onClick={propose}
           disabled={proposing || !roleId || saved.length === 0}
-          className="inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex rounded-full bg-rail px-4 py-2 text-sm font-semibold text-surface hover:bg-raildeep disabled:opacity-50"
         >
           Review plan
         </button>

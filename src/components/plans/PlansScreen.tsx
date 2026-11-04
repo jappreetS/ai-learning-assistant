@@ -38,6 +38,17 @@ export function PlansScreen() {
     await queryClient.invalidateQueries({ queryKey: ["plans"] });
   }
 
+  async function remove(plan: Plan) {
+    if (!confirm(`Delete ${plan.roleTitle}?`)) return;
+    const response = await fetch(`/api/v1/plans/${plan.id}`, { method: "DELETE" });
+    if (!response.ok) {
+      setMessage("Could not delete that plan.");
+      return;
+    }
+    setMessage("");
+    await queryClient.invalidateQueries({ queryKey: ["plans"] });
+  }
+
   const rows = plans.data ?? [];
   const active = rows.find((plan) => plan.active);
 
@@ -59,26 +70,33 @@ export function PlansScreen() {
       ) : plans.isError ? null : (
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {rows.map((plan) => (
-            <button
+            <div
               key={plan.id}
-              type="button"
-              onClick={() => activate(plan)}
               className={`rounded-xl border bg-surface p-5 text-left shadow-sm ${plan.active
                 ? "border-rail shadow-[0_0_0_3px_color-mix(in_oklab,var(--rail)_16%,transparent)]"
                 : "border-line"
                 }`}
             >
-              {plan.active ? (
-                <p className="mb-3 w-fit rounded-full bg-rail/10 px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide text-raildeep">
-                  Active now
+              <button type="button" onClick={() => activate(plan)} className="w-full text-left">
+                {plan.active ? (
+                  <p className="mb-3 w-fit rounded-full bg-rail/10 px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide text-raildeep">
+                    Active now
+                  </p>
+                ) : null}
+                <h2 className="text-lg font-bold tracking-tight">{plan.roleTitle}</h2>
+                <p className="mt-1 text-sm text-muted">
+                  {plan.company} · {plan.lengthWeeks}-week plan · Week {plan.currentWeek}
                 </p>
-              ) : null}
-              <h2 className="text-lg font-bold tracking-tight">{plan.roleTitle}</h2>
-              <p className="mt-1 text-sm text-muted">
-                {plan.company} · {plan.lengthWeeks}-week plan · Week {plan.currentWeek}
-              </p>
-              <p className="mt-3 text-sm text-muted">{plan.approved ? "Approved" : "Not approved"}</p>
-            </button>
+                <p className="mt-3 text-sm text-muted">{plan.approved ? "Approved" : "Not approved"}</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => remove(plan)}
+                className="mt-4 inline-flex rounded-full bg-surface px-4 py-2 text-sm font-semibold shadow-[inset_0_0_0_1px_var(--line)] hover:text-rail"
+              >
+                Delete
+              </button>
+            </div>
           ))}
         </div>
       )}

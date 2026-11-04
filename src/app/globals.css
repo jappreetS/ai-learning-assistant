@@ -41,3 +41,10 @@ body {
   color: var(--ink);
   font-family: var(--font-sans);
 }
+
+@layer base {
+  a,
+  button {
+    cursor: pointer;
+  }
+}
