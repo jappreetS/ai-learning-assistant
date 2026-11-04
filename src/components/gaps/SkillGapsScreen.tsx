@@ -15,21 +15,54 @@ const groups = [
 ] as const;
 
 type Gap = { id: string; kind: "match" | "gap" | "proof"; name: string; detail: string; position: number };
+type Role = {
+  id: string;
+  source: "resume-jd" | "jd-only" | "written";
+  resumeExcerpt: string | null;
+  jobDescription: string | null;
+};
+type Keyword = { name: string; present: boolean };
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlight(text: string, names: string[], className: string) {
+  const sorted = [...names].filter(Boolean).sort((a, b) => b.length - a.length);
+  if (sorted.length === 0) return text;
+  const pattern = new RegExp(sorted.map(escapeRegExp).join("|"), "gi");
+  const parts = text.split(pattern);
+  const marks = text.match(pattern) ?? [];
+  return parts.flatMap((part, index) => [
+    part,
+    marks[index] ? (
+      <mark key={`${marks[index]}-${index}`} className={`rounded px-0.5 ${className}`}>
+        {marks[index]}
+      </mark>
+    ) : null,
+  ]);
+}
 
 export function SkillGapsScreen() {
   const jobId = useSearchParams().get("job");
   const router = useRouter();
   const role = useQuery({
     queryKey: ["target-role"],
-    queryFn: () => readJson<{ id: string } | null>("/api/v1/target-roles"),
+    queryFn: () => readJson<Role | null>("/api/v1/target-roles"),
   });
   const gaps = useQuery({
     queryKey: ["target-role", role.data?.id, "gaps"],
     enabled: Boolean(role.data),
     queryFn: () => readJson<Gap[]>(`/api/v1/target-roles/${role.data!.id}/gaps`),
   });
-  const loading = role.isPending || (Boolean(role.data) && gaps.isPending);
-  const failed = role.isError || gaps.isError;
+  const keywords = useQuery({
+    queryKey: ["target-role", role.data?.id, "keywords"],
+    enabled: Boolean(role.data),
+    queryFn: () =>
+      readJson<{ keywords: Keyword[] }>(`/api/v1/target-roles/${role.data!.id}/keywords`),
+  });
+  const loading = role.isPending || (Boolean(role.data) && (gaps.isPending || keywords.isPending));
+  const failed = role.isError || gaps.isError || keywords.isError;
   const roleId = role.data?.id ?? null;
   const [proposing, setProposing] = useState(false);
   const [message, setMessage] = useState("");
@@ -50,6 +83,9 @@ export function SkillGapsScreen() {
   }
 
   const saved = gaps.data ?? [];
+  const keywordRows = keywords.data?.keywords ?? [];
+  const showComparison =
+    role.data?.source === "resume-jd" && Boolean(role.data.resumeExcerpt) && Boolean(role.data.jobDescription);
 
   return (
     <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:py-10">
@@ -71,6 +107,30 @@ export function SkillGapsScreen() {
         <p className="mt-8 text-sm text-muted">Could not load skill gaps</p>
       ) : (
         <>
+          {showComparison ? (
+            <div className="mt-8 grid gap-4 lg:grid-cols-2">
+              <section className="rounded-xl border border-line bg-surface p-5 shadow-sm">
+                <h2 className="text-base font-semibold">Resume</h2>
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-6">
+                  {highlight(
+                    role.data?.resumeExcerpt ?? "",
+                    keywordRows.filter((item) => item.present).map((item) => item.name),
+                    "bg-good/15 text-good",
+                  )}
+                </p>
+              </section>
+              <section className="rounded-xl border border-line bg-surface p-5 shadow-sm">
+                <h2 className="text-base font-semibold">Job description</h2>
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-6">
+                  {highlight(
+                    role.data?.jobDescription ?? "",
+                    keywordRows.filter((item) => !item.present).map((item) => item.name),
+                    "bg-bad/15 text-bad",
+                  )}
+                </p>
+              </section>
+            </div>
+          ) : null}
           <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4 rounded-xl border border-line bg-panel px-5 py-4 shadow-sm">
             {groups.map((group) => (
               <div key={group.kind}>
