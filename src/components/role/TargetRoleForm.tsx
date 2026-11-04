@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { targetRoleSchema } from "@/lib/schemas";
 import { Field } from "@/components/ui/Field";
+import { PdfFill } from "../ui/PdfFill";
 
 const choices = [
   { id: "resume-jd", label: "Resume and job description" },
@@ -87,12 +88,14 @@ export function TargetRoleForm() {
             <Field label="Role title" value={roleTitle} onChange={setRoleTitle} />
             <Field label="Company" value={company} onChange={setCompany} />
             <Field label="Resume excerpt" value={resume} onChange={setResume} multiline />
+            <PdfFill onText={setResume} onMessage={setMessage} />
             <Field
               label="Job description"
               value={jobDescription}
               onChange={setJobDescription}
               multiline
             />
+            <PdfFill onText={setJobDescription} onMessage={setMessage} />
           </div>
         ) : choice === "jd-only" ? (
           <div>
