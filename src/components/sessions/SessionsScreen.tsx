@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Shimmer } from "@/components/ui/Shimmer";
 import { readJson } from "@/lib/api";
+import { sessionSchema } from "@/lib/schemas";
 
 type Skill = { id: string; name: string };
 type Session = {
@@ -56,19 +57,21 @@ export function SessionsScreen() {
   const [note, setNote] = useState("");
   const [skillId, setSkillId] = useState("");
   const [message, setMessage] = useState("");
+  const sessionBody = {
+    skillId,
+    occurredOn: date,
+    duration,
+    stage: stage.toLowerCase(),
+    note,
+  };
+  const parsed = sessionSchema.safeParse(sessionBody);
 
   async function saveSession() {
-    if (!planId || !skillId) return;
+    if (!planId || !parsed.success) return;
     const response = await fetch(`/api/v1/plans/${planId}/sessions`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        skillId,
-        occurredOn: date,
-        duration,
-        stage: stage.toLowerCase(),
-        note,
-      }),
+      body: JSON.stringify(parsed.data),
     });
     if (!response.ok) {
       setMessage("Could not save the session.");
@@ -138,7 +141,7 @@ export function SessionsScreen() {
               <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={saveSession}
-                  disabled={!planId || !date || !duration || !skillId || !stage || !note.trim()}
+                  disabled={!planId || !parsed.success}
                 >
                   Save session
                 </Button>
