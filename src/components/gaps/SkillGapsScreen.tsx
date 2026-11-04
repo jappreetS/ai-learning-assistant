@@ -128,6 +128,16 @@ export function SkillGapsScreen() {
                     "bg-bad/15 text-bad",
                   )}
                 </p>
+                <ul className="mt-4 flex flex-col gap-3">
+                  {keywordRows
+                    .filter((item) => !item.present)
+                    .map((item) => (
+                      <li key={item.name}>
+                        <p className="text-sm font-semibold text-bad">{item.name}</p>
+                        <p className="mt-1 text-sm text-muted">Add a bullet that shows {item.name}.</p>
+                      </li>
+                    ))}
+                </ul>
               </section>
             </div>
           ) : null}
