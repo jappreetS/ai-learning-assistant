@@ -105,6 +105,7 @@ export function TargetRoleForm() {
               onChange={setOnlyJobDescription}
               multiline
             />
+            <PdfFill onText={setOnlyJobDescription} onMessage={setMessage} />
           </div>
         ) : (
           <div className="flex flex-col gap-4">
