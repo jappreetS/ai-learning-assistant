@@ -1,16 +1,9 @@
 import { and, desc, eq } from "drizzle-orm";
-import { z } from "zod";
 
 import { db } from "@/db/client";
 import { plans, sessions, skills } from "@/db/schema";
 
-const bodySchema = z.object({
-  skillId: z.uuid(),
-  occurredOn: z.iso.date(),
-  duration: z.string().min(1),
-  stage: z.enum(["studied", "practiced", "applied", "demonstrated"]),
-  note: z.string().min(1),
-});
+import { sessionSchema } from "@/lib/schemas";
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
@@ -29,7 +22,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
-  const parsed = bodySchema.safeParse(await request.json());
+  const parsed = sessionSchema.safeParse(await request.json());
   if (!parsed.success) {
     return Response.json({ error: "Invalid session" }, { status: 400 });
   }
